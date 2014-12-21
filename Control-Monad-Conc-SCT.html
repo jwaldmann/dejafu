@@ -5,21 +5,20 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Monad-Conc-SCT
  concurrency errors such as data races and deadlocks.</p><p>As an example, consider this program, which has two locks and a
  shared variable. Two threads are spawned, which claim the locks,
  update the shared variable, and release the locks. The main thread
- waits for them both to terminate, and returns the final result.</p><pre>bad :: Conc t Int
+ waits for them both to terminate, and returns the final result.</p><pre>bad :: ConcCVar (cvar t) (m t) =&gt; m t Int
 bad = do
-  a &lt;- new
-  b &lt;- new
+  a &lt;- newEmptyCVar
+  b &lt;- newEmptyCVar
 
-  c &lt;- new
-  put c 0
+  c &lt;- newCVar 0
 
-  j1 &lt;- spawn $ put a () &gt;&gt; put b () &gt;&gt; take c &gt;&gt;= put c . succ &gt;&gt; take b &gt;&gt; take a
-  j2 &lt;- spawn $ put b () &gt;&gt; put a () &gt;&gt; take c &gt;&gt;= put c . pred &gt;&gt; take a &gt;&gt; take b
+  j1 &lt;- spawn $ lock a &gt;&gt; lock b &gt;&gt; modifyCVar_ c (return . succ) &gt;&gt; unlock b &gt;&gt; unlock a
+  j2 &lt;- spawn $ lock b &gt;&gt; lock a &gt;&gt; modifyCVar_ c (return . pred) &gt;&gt; unlock a &gt;&gt; unlock b
 
-  take j1
-  take j2
+  takeCVar j1
+  takeCVar j2
 
-  take c</pre><p>The correct result is 0, as it starts out as 0 and is incremented
+  takeCVar c</pre><p>The correct result is 0, as it starts out as 0 and is incremented
  and decremented by threads 1 and 2, respectively. However, note the
  order of acquisition of the locks in the two threads. If thread 2
  pre-empts thread 1 between the acquisition of the locks (or if
