@@ -5,7 +5,7 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Monad-Conc-SCT
  concurrency errors such as data races and deadlocks.</p><p>As an example, consider this program, which has two locks and a
  shared variable. Two threads are spawned, which claim the locks,
  update the shared variable, and release the locks. The main thread
- waits for them both to terminate, and returns the final result.</p><pre>bad :: ConcCVar (cvar t) (m t) =&gt; m t Int
+ waits for them both to terminate, and returns the final result.</p><pre>bad :: ConcCVar cvar m =&gt; m Int
 bad = do
   a &lt;- newEmptyCVar
   b &lt;- newEmptyCVar

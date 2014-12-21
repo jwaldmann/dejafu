@@ -17,7 +17,7 @@
 <a name="line-8"></a><span class='hs-comment'>-- update the shared variable, and release the locks. The main thread</span>
 <a name="line-9"></a><span class='hs-comment'>-- waits for them both to terminate, and returns the final result.</span>
 <a name="line-10"></a><span class='hs-comment'>--</span>
-<a name="line-11"></a><span class='hs-comment'>-- &gt; bad :: ConcCVar (cvar t) (m t) =&gt; m t Int</span>
+<a name="line-11"></a><span class='hs-comment'>-- &gt; bad :: ConcCVar cvar m =&gt; m Int</span>
 <a name="line-12"></a><span class='hs-comment'>-- &gt; bad = do</span>
 <a name="line-13"></a><span class='hs-comment'>-- &gt;   a &lt;- newEmptyCVar</span>
 <a name="line-14"></a><span class='hs-comment'>-- &gt;   b &lt;- newEmptyCVar</span>
