@@ -53,7 +53,7 @@
 <a name="line-44"></a><a name="ConcCVar"></a><span class='hs-comment'>-- multiple times to the same `IVar`, which removes the possibility of</span>
 <a name="line-45"></a><a name="ConcCVar"></a><span class='hs-comment'>-- data races.</span>
 <a name="line-46"></a><a name="ConcCVar"></a><span class='hs-comment'>--</span>
-<a name="line-47"></a><a name="ConcCVar"></a><span class='hs-comment'>-- A minimal implementation consists of 'fork', 'newCVar',</span>
+<a name="line-47"></a><a name="ConcCVar"></a><span class='hs-comment'>-- A minimal implementation consists of 'fork', 'newEmptyCVar',</span>
 <a name="line-48"></a><a name="ConcCVar"></a><span class='hs-comment'>-- 'tryPutCVar', and 'tryTakeCVar'. The default implementations of</span>
 <a name="line-49"></a><a name="ConcCVar"></a><span class='hs-comment'>-- 'takeCVar' and 'putCVar', however, are very inefficient, and should</span>
 <a name="line-50"></a><a name="ConcCVar"></a><span class='hs-comment'>-- probably always be overridden to make use of</span>
