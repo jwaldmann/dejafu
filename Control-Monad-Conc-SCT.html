@@ -85,9 +85,7 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Monad-Conc-SCT
 </h1><div class="top"><p class="src"><a name="v:sctPreBound" class="def">sctPreBound</a><a href="src/Control-Monad-Conc-SCT-PreBound.html#sctPreBound" class="link">Source</a></p><div class="subs arguments"><p class="caption">Arguments</p><table><tr><td class="src">:: Int</td><td class="doc"><p>The pre-emption bound. Anything &lt; 0 will be
  interpreted as 0.
 </p></td></tr><tr><td class="src">-&gt; (<span class="keyword">forall</span> t.  <a href="Control-Monad-Conc-Fixed-ST.html#t:Conc">Conc</a> t a)</td><td class="doc empty">&nbsp;</td></tr><tr><td class="src">-&gt; [(Maybe a, <a href="Control-Monad-Conc-SCT.html#t:SCTTrace">SCTTrace</a>)]</td><td class="doc empty">&nbsp;</td></tr></table></div><div class="doc"><p>An SCT runner using a pre-emption bounding scheduler. Schedules
- will be explored systematically, starting with all
- pre-emption-count zero schedules, and gradually adding more
- pre-emptions.
+ are explored systematically, in a depth-first fashion.
 </p></div></div><div class="top"><p class="src"><a name="v:sctPreBoundIO" class="def">sctPreBoundIO</a> ::  Int -&gt; (<span class="keyword">forall</span> t.  <a href="Control-Monad-Conc-Fixed-IO.html#t:Conc">Conc</a> t a) -&gt; IO [(Maybe a, <a href="Control-Monad-Conc-SCT.html#t:SCTTrace">SCTTrace</a>)]<a href="src/Control-Monad-Conc-SCT-PreBound.html#sctPreBoundIO" class="link">Source</a></p><div class="doc"><p>Variant of <code><a href="Control-Monad-Conc-SCT.html#v:sctPreBound">sctPreBound</a></code> using <code>IO</code>. See usual caveats about IO.
 </p></div></div><div class="top"><p class="src"><a name="v:preEmpCount" class="def">preEmpCount</a> :: [<a href="Control-Monad-Conc-SCT.html#t:Decision">Decision</a>] -&gt; Int<a href="src/Control-Monad-Conc-SCT-PreBound.html#preEmpCount" class="link">Source</a></p><div class="doc"><p>Check the pre-emption count of some scheduling decisions.
 </p></div></div><h1 id="g:5">Utilities
