@@ -37,8 +37,8 @@
 <a name="line-28"></a><span class='hs-comment'>-- order of acquisition of the locks in the two threads. If thread 2</span>
 <a name="line-29"></a><span class='hs-comment'>-- pre-empts thread 1 between the acquisition of the locks (or if</span>
 <a name="line-30"></a><span class='hs-comment'>-- thread 1 pre-empts thread 2), a deadlock situation will arise, as</span>
-<a name="line-31"></a><span class='hs-comment'>-- thread 1 will have lock `a` and be waiting on `b`, and thread 2</span>
-<a name="line-32"></a><span class='hs-comment'>-- will have `b` and be waiting on `a`.</span>
+<a name="line-31"></a><span class='hs-comment'>-- thread 1 will have lock @a@ and be waiting on @b@, and thread 2</span>
+<a name="line-32"></a><span class='hs-comment'>-- will have @b@ and be waiting on @a@.</span>
 <a name="line-33"></a>
 <a name="line-34"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span><span class='hs-varop'>.</span><span class='hs-conid'>Conc</span><span class='hs-varop'>.</span><span class='hs-conid'>SCT</span>
 <a name="line-35"></a> <span class='hs-layout'>(</span> <span class='hs-comment'>-- * Types</span>
@@ -63,7 +63,7 @@
 <a name="line-54"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>preEmpCount</span>
 <a name="line-55"></a>
 <a name="line-56"></a> <span class='hs-comment'>-- * Utilities</span>
-<a name="line-57"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>toSCT</span>
+<a name="line-57"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>makeSCT</span>
 <a name="line-58"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>showTrace</span>
 <a name="line-59"></a> <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
 <a name="line-60"></a>
@@ -76,18 +76,18 @@
 <a name="line-67"></a>
 <a name="line-68"></a><a name="sctRandom"></a><span class='hs-comment'>-- | A simple pre-emptive random scheduler.</span>
 <a name="line-69"></a><span class='hs-definition'>sctRandom</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>RandomGen</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>SCTScheduler</span> <span class='hs-varid'>g</span>
-<a name="line-70"></a><span class='hs-definition'>sctRandom</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>toSCT</span> <span class='hs-varid'>randomSched</span>
+<a name="line-70"></a><span class='hs-definition'>sctRandom</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>makeSCT</span> <span class='hs-varid'>randomSched</span>
 <a name="line-71"></a>
 <a name="line-72"></a><a name="sctRandomNP"></a><span class='hs-comment'>-- | A random scheduler with no pre-emption.</span>
 <a name="line-73"></a><span class='hs-definition'>sctRandomNP</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>RandomGen</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>SCTScheduler</span> <span class='hs-varid'>g</span>
-<a name="line-74"></a><span class='hs-definition'>sctRandomNP</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>toSCT</span> <span class='hs-varid'>randomSchedNP</span>
+<a name="line-74"></a><span class='hs-definition'>sctRandomNP</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>makeSCT</span> <span class='hs-varid'>randomSchedNP</span>
 <a name="line-75"></a>
 <a name="line-76"></a><span class='hs-comment'>-- * Utils</span>
 <a name="line-77"></a>
-<a name="line-78"></a><a name="toSCT"></a><span class='hs-comment'>-- | Convert a 'Scheduler' to an 'SCTScheduler' by recording the</span>
+<a name="line-78"></a><a name="makeSCT"></a><span class='hs-comment'>-- | Convert a 'Scheduler' to an 'SCTScheduler' by recording the</span>
 <a name="line-79"></a><span class='hs-comment'>-- trace.</span>
-<a name="line-80"></a><span class='hs-definition'>toSCT</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Scheduler</span> <span class='hs-varid'>s</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>SCTScheduler</span> <span class='hs-varid'>s</span>
-<a name="line-81"></a><span class='hs-definition'>toSCT</span> <span class='hs-varid'>sched</span> <span class='hs-layout'>(</span><span class='hs-varid'>s</span><span class='hs-layout'>,</span> <span class='hs-varid'>trace</span><span class='hs-layout'>)</span> <span class='hs-varid'>prior</span> <span class='hs-varid'>threads</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>tid</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>s'</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>decision</span><span class='hs-layout'>,</span> <span class='hs-varid'>alters</span><span class='hs-layout'>)</span> <span class='hs-conop'>:</span> <span class='hs-varid'>trace</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-80"></a><span class='hs-definition'>makeSCT</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Scheduler</span> <span class='hs-varid'>s</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>SCTScheduler</span> <span class='hs-varid'>s</span>
+<a name="line-81"></a><span class='hs-definition'>makeSCT</span> <span class='hs-varid'>sched</span> <span class='hs-layout'>(</span><span class='hs-varid'>s</span><span class='hs-layout'>,</span> <span class='hs-varid'>trace</span><span class='hs-layout'>)</span> <span class='hs-varid'>prior</span> <span class='hs-varid'>threads</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>tid</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>s'</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>decision</span><span class='hs-layout'>,</span> <span class='hs-varid'>alters</span><span class='hs-layout'>)</span> <span class='hs-conop'>:</span> <span class='hs-varid'>trace</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
 <a name="line-82"></a>  <span class='hs-layout'>(</span><span class='hs-varid'>tid</span><span class='hs-layout'>,</span> <span class='hs-varid'>s'</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>sched</span> <span class='hs-varid'>s</span> <span class='hs-varid'>prior</span> <span class='hs-varid'>threads</span>
 <a name="line-83"></a>
 <a name="line-84"></a>  <span class='hs-varid'>decision</span> <span class='hs-keyglyph'>|</span> <span class='hs-varid'>tid</span> <span class='hs-varop'>==</span> <span class='hs-varid'>prior</span>         <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Continue</span>
