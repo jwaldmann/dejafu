@@ -8,84 +8,83 @@
 </head>
 <body>
 <pre><a name="line-1"></a><span class='hs-comment'>{-# LANGUAGE MultiParamTypeClasses #-}</span>
-<a name="line-2"></a><span class='hs-comment'>{-# LANGUAGE TupleSections         #-}</span>
-<a name="line-3"></a>
-<a name="line-4"></a><span class='hs-comment'>-- | Combinators using @CVar@s. These provide many of the helpful</span>
-<a name="line-5"></a><span class='hs-comment'>-- functions found in Control.Concurrent.MVar, but for @CVar@s. Note</span>
-<a name="line-6"></a><span class='hs-comment'>-- that these do not in general mask exceptions, and are not atomic,</span>
-<a name="line-7"></a><span class='hs-comment'>-- being implemented in terms of the primitives in the 'ConcFuture'</span>
-<a name="line-8"></a><span class='hs-comment'>-- and 'ConcCVar' typeclasses.</span>
-<a name="line-9"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span><span class='hs-varop'>.</span><span class='hs-conid'>Conc</span><span class='hs-varop'>.</span><span class='hs-conid'>CVar</span>
-<a name="line-10"></a> <span class='hs-layout'>(</span> <span class='hs-comment'>-- *Combinators</span>
-<a name="line-11"></a>   <span class='hs-varid'>newCVar</span>
-<a name="line-12"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>swapCVar</span>
-<a name="line-13"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>isEmptyCVar</span>
-<a name="line-14"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>withCVar</span>
-<a name="line-15"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>modifyCVar</span>
-<a name="line-16"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>modifyCVar_</span>
-<a name="line-17"></a>
-<a name="line-18"></a> <span class='hs-comment'>-- * Binary semaphores</span>
-<a name="line-19"></a> <span class='hs-comment'>-- | A common use of @CVar@s is in making binary semaphores to</span>
-<a name="line-20"></a> <span class='hs-comment'>-- control mutual exclusion over a resource, so a couple of helper</span>
-<a name="line-21"></a> <span class='hs-comment'>-- functions are provided.</span>
-<a name="line-22"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>lock</span>
-<a name="line-23"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>unlock</span>
-<a name="line-24"></a> <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-25"></a>
-<a name="line-26"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span> <span class='hs-layout'>(</span><span class='hs-varid'>liftM</span><span class='hs-layout'>)</span>
-<a name="line-27"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span><span class='hs-varop'>.</span><span class='hs-conid'>Conc</span><span class='hs-varop'>.</span><span class='hs-conid'>Class</span>
-<a name="line-28"></a>
-<a name="line-29"></a><a name="newCVar"></a><span class='hs-comment'>-- | Create a new @CVar@ containing a value.</span>
-<a name="line-30"></a><span class='hs-definition'>newCVar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-layout'>(</span><span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
-<a name="line-31"></a><span class='hs-definition'>newCVar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-32"></a>  <span class='hs-varid'>cvar</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>newEmptyCVar</span>
-<a name="line-33"></a>  <span class='hs-varid'>putCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span>
-<a name="line-34"></a>  <span class='hs-varid'>return</span> <span class='hs-varid'>cvar</span>
-<a name="line-35"></a>
-<a name="line-36"></a><a name="swapCVar"></a><span class='hs-comment'>-- | Swap the contents of a @CVar@, and return the value taken.</span>
-<a name="line-37"></a><span class='hs-definition'>swapCVar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>a</span>
-<a name="line-38"></a><span class='hs-definition'>swapCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-39"></a>  <span class='hs-varid'>old</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>takeCVar</span> <span class='hs-varid'>cvar</span>
-<a name="line-40"></a>  <span class='hs-varid'>putCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span>
-<a name="line-41"></a>  <span class='hs-varid'>return</span> <span class='hs-varid'>old</span>
-<a name="line-42"></a>
-<a name="line-43"></a><a name="isEmptyCVar"></a><span class='hs-comment'>-- | Check if a @CVar@ is empty.</span>
-<a name="line-44"></a><span class='hs-definition'>isEmptyCVar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-conid'>Bool</span>
-<a name="line-45"></a><span class='hs-definition'>isEmptyCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-46"></a>  <span class='hs-varid'>val</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>tryTakeCVar</span> <span class='hs-varid'>cvar</span>
-<a name="line-47"></a>  <span class='hs-keyword'>case</span> <span class='hs-varid'>val</span> <span class='hs-keyword'>of</span>
-<a name="line-48"></a>    <span class='hs-conid'>Just</span> <span class='hs-varid'>val'</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>putCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>val'</span> <span class='hs-varop'>&gt;&gt;</span> <span class='hs-varid'>return</span> <span class='hs-conid'>True</span>
-<a name="line-49"></a>    <span class='hs-conid'>Nothing</span>   <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>return</span> <span class='hs-conid'>False</span>
-<a name="line-50"></a>
-<a name="line-51"></a><a name="withCVar"></a><span class='hs-comment'>-- | Operate on the contents of a @CVar@, replacing the contents after</span>
-<a name="line-52"></a><span class='hs-comment'>-- finishing.</span>
-<a name="line-53"></a><span class='hs-definition'>withCVar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>b</span>
-<a name="line-54"></a><span class='hs-definition'>withCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-55"></a>  <span class='hs-varid'>val</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>takeCVar</span> <span class='hs-varid'>cvar</span>
-<a name="line-56"></a>  <span class='hs-varid'>out</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>f</span> <span class='hs-varid'>val</span>
-<a name="line-57"></a>  <span class='hs-varid'>putCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>val</span>
-<a name="line-58"></a>
-<a name="line-59"></a>  <span class='hs-varid'>return</span> <span class='hs-varid'>out</span>
-<a name="line-60"></a>
-<a name="line-61"></a><a name="modifyCVar"></a><span class='hs-comment'>-- | Apply a function to the value inside a @CVar@, and also return a</span>
-<a name="line-62"></a><span class='hs-comment'>-- value.</span>
-<a name="line-63"></a><span class='hs-definition'>modifyCVar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>b</span>
-<a name="line-64"></a><span class='hs-definition'>modifyCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-65"></a>  <span class='hs-varid'>val</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>takeCVar</span> <span class='hs-varid'>cvar</span>
-<a name="line-66"></a>  <span class='hs-layout'>(</span><span class='hs-varid'>val'</span><span class='hs-layout'>,</span> <span class='hs-varid'>out</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>f</span> <span class='hs-varid'>val</span>
-<a name="line-67"></a>  <span class='hs-varid'>putCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>val'</span>
-<a name="line-68"></a>  <span class='hs-varid'>return</span> <span class='hs-varid'>out</span>
-<a name="line-69"></a>
-<a name="line-70"></a><a name="modifyCVar_"></a><span class='hs-comment'>-- | Modify the contents of a @CVar@.</span>
-<a name="line-71"></a><span class='hs-definition'>modifyCVar_</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-conid'>()</span>
-<a name="line-72"></a><span class='hs-definition'>modifyCVar_</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>modifyCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varop'>$</span> <span class='hs-keyglyph'>\</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-layout'>,</span> <span class='hs-conid'>()</span><span class='hs-layout'>)</span> <span class='hs-varop'>`liftM`</span> <span class='hs-varid'>f</span> <span class='hs-varid'>a</span>
-<a name="line-73"></a>
-<a name="line-74"></a><a name="lock"></a><span class='hs-comment'>-- | Put a @()@ into a @CVar@, claiming the lock. This is atomic.</span>
-<a name="line-75"></a><span class='hs-definition'>lock</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-conid'>()</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-conid'>()</span>
-<a name="line-76"></a><span class='hs-definition'>lock</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>flip</span> <span class='hs-varid'>putCVar</span> <span class='hs-conid'>()</span>
-<a name="line-77"></a>
-<a name="line-78"></a><a name="unlock"></a><span class='hs-comment'>-- | Empty a @CVar@, releasing the lock. This is atomic.</span>
-<a name="line-79"></a><span class='hs-definition'>unlock</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-conid'>()</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-conid'>()</span>
-<a name="line-80"></a><span class='hs-definition'>unlock</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>takeCVar</span>
+<a name="line-2"></a>
+<a name="line-3"></a><span class='hs-comment'>-- | Combinators using @CVar@s. These provide many of the helpful</span>
+<a name="line-4"></a><span class='hs-comment'>-- functions found in Control.Concurrent.MVar, but for @CVar@s. Note</span>
+<a name="line-5"></a><span class='hs-comment'>-- that these do not in general mask exceptions, and are not atomic,</span>
+<a name="line-6"></a><span class='hs-comment'>-- being implemented in terms of the primitives in the 'ConcFuture'</span>
+<a name="line-7"></a><span class='hs-comment'>-- and 'ConcCVar' typeclasses.</span>
+<a name="line-8"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span><span class='hs-varop'>.</span><span class='hs-conid'>Conc</span><span class='hs-varop'>.</span><span class='hs-conid'>CVar</span>
+<a name="line-9"></a> <span class='hs-layout'>(</span> <span class='hs-comment'>-- *Combinators</span>
+<a name="line-10"></a>   <span class='hs-varid'>newCVar</span>
+<a name="line-11"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>swapCVar</span>
+<a name="line-12"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>isEmptyCVar</span>
+<a name="line-13"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>withCVar</span>
+<a name="line-14"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>modifyCVar</span>
+<a name="line-15"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>modifyCVar_</span>
+<a name="line-16"></a>
+<a name="line-17"></a> <span class='hs-comment'>-- * Binary semaphores</span>
+<a name="line-18"></a> <span class='hs-comment'>-- | A common use of @CVar@s is in making binary semaphores to</span>
+<a name="line-19"></a> <span class='hs-comment'>-- control mutual exclusion over a resource, so a couple of helper</span>
+<a name="line-20"></a> <span class='hs-comment'>-- functions are provided.</span>
+<a name="line-21"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>lock</span>
+<a name="line-22"></a> <span class='hs-layout'>,</span> <span class='hs-varid'>unlock</span>
+<a name="line-23"></a> <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-24"></a>
+<a name="line-25"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span> <span class='hs-layout'>(</span><span class='hs-varid'>liftM</span><span class='hs-layout'>)</span>
+<a name="line-26"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span><span class='hs-varop'>.</span><span class='hs-conid'>Conc</span><span class='hs-varop'>.</span><span class='hs-conid'>Class</span>
+<a name="line-27"></a>
+<a name="line-28"></a><a name="newCVar"></a><span class='hs-comment'>-- | Create a new @CVar@ containing a value.</span>
+<a name="line-29"></a><span class='hs-definition'>newCVar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-layout'>(</span><span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
+<a name="line-30"></a><span class='hs-definition'>newCVar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-31"></a>  <span class='hs-varid'>cvar</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>newEmptyCVar</span>
+<a name="line-32"></a>  <span class='hs-varid'>putCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span>
+<a name="line-33"></a>  <span class='hs-varid'>return</span> <span class='hs-varid'>cvar</span>
+<a name="line-34"></a>
+<a name="line-35"></a><a name="swapCVar"></a><span class='hs-comment'>-- | Swap the contents of a @CVar@, and return the value taken.</span>
+<a name="line-36"></a><span class='hs-definition'>swapCVar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>a</span>
+<a name="line-37"></a><span class='hs-definition'>swapCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-38"></a>  <span class='hs-varid'>old</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>takeCVar</span> <span class='hs-varid'>cvar</span>
+<a name="line-39"></a>  <span class='hs-varid'>putCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span>
+<a name="line-40"></a>  <span class='hs-varid'>return</span> <span class='hs-varid'>old</span>
+<a name="line-41"></a>
+<a name="line-42"></a><a name="isEmptyCVar"></a><span class='hs-comment'>-- | Check if a @CVar@ is empty.</span>
+<a name="line-43"></a><span class='hs-definition'>isEmptyCVar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-conid'>Bool</span>
+<a name="line-44"></a><span class='hs-definition'>isEmptyCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-45"></a>  <span class='hs-varid'>val</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>tryTakeCVar</span> <span class='hs-varid'>cvar</span>
+<a name="line-46"></a>  <span class='hs-keyword'>case</span> <span class='hs-varid'>val</span> <span class='hs-keyword'>of</span>
+<a name="line-47"></a>    <span class='hs-conid'>Just</span> <span class='hs-varid'>val'</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>putCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>val'</span> <span class='hs-varop'>&gt;&gt;</span> <span class='hs-varid'>return</span> <span class='hs-conid'>True</span>
+<a name="line-48"></a>    <span class='hs-conid'>Nothing</span>   <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>return</span> <span class='hs-conid'>False</span>
+<a name="line-49"></a>
+<a name="line-50"></a><a name="withCVar"></a><span class='hs-comment'>-- | Operate on the contents of a @CVar@, replacing the contents after</span>
+<a name="line-51"></a><span class='hs-comment'>-- finishing.</span>
+<a name="line-52"></a><span class='hs-definition'>withCVar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>b</span>
+<a name="line-53"></a><span class='hs-definition'>withCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-54"></a>  <span class='hs-varid'>val</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>takeCVar</span> <span class='hs-varid'>cvar</span>
+<a name="line-55"></a>  <span class='hs-varid'>out</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>f</span> <span class='hs-varid'>val</span>
+<a name="line-56"></a>  <span class='hs-varid'>putCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>val</span>
+<a name="line-57"></a>
+<a name="line-58"></a>  <span class='hs-varid'>return</span> <span class='hs-varid'>out</span>
+<a name="line-59"></a>
+<a name="line-60"></a><a name="modifyCVar"></a><span class='hs-comment'>-- | Apply a function to the value inside a @CVar@, and also return a</span>
+<a name="line-61"></a><span class='hs-comment'>-- value.</span>
+<a name="line-62"></a><span class='hs-definition'>modifyCVar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>b</span>
+<a name="line-63"></a><span class='hs-definition'>modifyCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-64"></a>  <span class='hs-varid'>val</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>takeCVar</span> <span class='hs-varid'>cvar</span>
+<a name="line-65"></a>  <span class='hs-layout'>(</span><span class='hs-varid'>val'</span><span class='hs-layout'>,</span> <span class='hs-varid'>out</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>f</span> <span class='hs-varid'>val</span>
+<a name="line-66"></a>  <span class='hs-varid'>putCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>val'</span>
+<a name="line-67"></a>  <span class='hs-varid'>return</span> <span class='hs-varid'>out</span>
+<a name="line-68"></a>
+<a name="line-69"></a><a name="modifyCVar_"></a><span class='hs-comment'>-- | Modify the contents of a @CVar@.</span>
+<a name="line-70"></a><span class='hs-definition'>modifyCVar_</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-conid'>()</span>
+<a name="line-71"></a><span class='hs-definition'>modifyCVar_</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>modifyCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varop'>$</span> <span class='hs-keyglyph'>\</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span><span class='hs-layout'>,</span> <span class='hs-conid'>()</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varop'>`liftM`</span> <span class='hs-varid'>f</span> <span class='hs-varid'>a</span>
+<a name="line-72"></a>
+<a name="line-73"></a><a name="lock"></a><span class='hs-comment'>-- | Put a @()@ into a @CVar@, claiming the lock. This is atomic.</span>
+<a name="line-74"></a><span class='hs-definition'>lock</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-conid'>()</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-conid'>()</span>
+<a name="line-75"></a><span class='hs-definition'>lock</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>flip</span> <span class='hs-varid'>putCVar</span> <span class='hs-conid'>()</span>
+<a name="line-76"></a>
+<a name="line-77"></a><a name="unlock"></a><span class='hs-comment'>-- | Empty a @CVar@, releasing the lock. This is atomic.</span>
+<a name="line-78"></a><span class='hs-definition'>unlock</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ConcCVar</span> <span class='hs-varid'>cvar</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>cvar</span> <span class='hs-conid'>()</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-conid'>()</span>
+<a name="line-79"></a><span class='hs-definition'>unlock</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>takeCVar</span>
 </pre></body>
 </html>
