@@ -10,8 +10,8 @@ bit of nondeterminism.
 nondeterministic concurrency, with an interface very much in the
 spirit of <code>Par</code>, but slightly more relaxed. Specifically, <code>Conc</code>'s
 <code>IVar</code> equivalent, <code>CVar</code>s, can be written to multiple times.
-</p><h2><code>Conc</code> monads with <code>IO</code>:</h2>
-<p>The intention of the <code>Conc</code> monads is to provide concurrency where
+</p><h2><code>Conc</code> monads with <code>IO</code>:
+</h2><p>The intention of the <code>Conc</code> monads is to provide concurrency where
 any apparent nondeterminism arises purely from the scheduling
 behaviour. To put it another way, a given <code>Conc</code> computation,
 parametrised with a fixed set of scheduling decisions, is
