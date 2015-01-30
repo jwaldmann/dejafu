@@ -89,13 +89,5 @@
 <a name="line-80"></a><a name="sctRandomNP"></a><span class='hs-comment'>-- | A random scheduler with no pre-emption.</span>
 <a name="line-81"></a><span class='hs-definition'>sctRandomNP</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>RandomGen</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>SCTScheduler</span> <span class='hs-varid'>g</span>
 <a name="line-82"></a><span class='hs-definition'>sctRandomNP</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>makeSCT</span> <span class='hs-varid'>randomSchedNP</span>
-<a name="line-83"></a>
-<a name="line-84"></a><span class='hs-comment'>-- * Utils</span>
-<a name="line-85"></a>
-<a name="line-86"></a><a name="preEmpCount"></a><span class='hs-comment'>-- | Check the pre-emption count of some scheduling decisions.</span>
-<a name="line-87"></a><span class='hs-definition'>preEmpCount</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>Decision</span><span class='hs-keyglyph'>]</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Int</span>
-<a name="line-88"></a><span class='hs-definition'>preEmpCount</span> <span class='hs-layout'>(</span><span class='hs-conid'>SwitchTo</span> <span class='hs-keyword'>_</span><span class='hs-conop'>:</span><span class='hs-varid'>ss</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-num'>1</span> <span class='hs-varop'>+</span> <span class='hs-varid'>preEmpCount</span> <span class='hs-varid'>ss</span>
-<a name="line-89"></a><span class='hs-definition'>preEmpCount</span> <span class='hs-layout'>(</span><span class='hs-keyword'>_</span><span class='hs-conop'>:</span><span class='hs-varid'>ss</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>preEmpCount</span> <span class='hs-varid'>ss</span>
-<a name="line-90"></a><span class='hs-definition'>preEmpCount</span> <span class='hs-conid'>[]</span> <span class='hs-keyglyph'>=</span> <span class='hs-num'>0</span>
 </pre></body>
 </html>
