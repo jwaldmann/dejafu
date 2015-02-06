@@ -95,15 +95,36 @@
 <a name="line-86"></a>  <span class='hs-comment'>-- returning 'Nothing'.</span>
 <a name="line-87"></a>  <span class='hs-varid'>tryTakeCVar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>CVar</span> <span class='hs-varid'>m</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
 <a name="line-88"></a>
-<a name="line-89"></a><a name="instance%20MonadConc%20IO"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>MonadConc</span> <span class='hs-conid'>IO</span> <span class='hs-keyword'>where</span>
-<a name="line-90"></a>  <span class='hs-keyword'>type</span> <span class='hs-conid'>CVar</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>MVar</span>
-<a name="line-91"></a>
-<a name="line-92"></a>  <span class='hs-varid'>readCVar</span>     <span class='hs-keyglyph'>=</span> <span class='hs-varid'>readMVar</span>
-<a name="line-93"></a>  <span class='hs-varid'>fork</span>         <span class='hs-keyglyph'>=</span> <span class='hs-varid'>void</span> <span class='hs-varop'>.</span> <span class='hs-varid'>forkIO</span>
-<a name="line-94"></a>  <span class='hs-varid'>newEmptyCVar</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>newEmptyMVar</span>
-<a name="line-95"></a>  <span class='hs-varid'>putCVar</span>      <span class='hs-keyglyph'>=</span> <span class='hs-varid'>putMVar</span>
-<a name="line-96"></a>  <span class='hs-varid'>tryPutCVar</span>   <span class='hs-keyglyph'>=</span> <span class='hs-varid'>tryPutMVar</span>
-<a name="line-97"></a>  <span class='hs-varid'>takeCVar</span>     <span class='hs-keyglyph'>=</span> <span class='hs-varid'>takeMVar</span>
-<a name="line-98"></a>  <span class='hs-varid'>tryTakeCVar</span>  <span class='hs-keyglyph'>=</span> <span class='hs-varid'>tryTakeMVar</span>
+<a name="line-89"></a>  <span class='hs-comment'>-- | Runs its argument, just as if the @_concNoTest@ weren't there.</span>
+<a name="line-90"></a>  <span class='hs-comment'>--</span>
+<a name="line-91"></a>  <span class='hs-comment'>-- &gt; _concNoTest x = x</span>
+<a name="line-92"></a>  <span class='hs-comment'>--</span>
+<a name="line-93"></a>  <span class='hs-comment'>-- This function is purely for testing purposes, and indicates that</span>
+<a name="line-94"></a>  <span class='hs-comment'>-- it's not worth considering more than one schedule here. This is</span>
+<a name="line-95"></a>  <span class='hs-comment'>-- useful if you have some larger computation built up out of</span>
+<a name="line-96"></a>  <span class='hs-comment'>-- subcomputations which you have already got tests for: you only</span>
+<a name="line-97"></a>  <span class='hs-comment'>-- want to consider what's unique to the large component.</span>
+<a name="line-98"></a>  <span class='hs-comment'>--</span>
+<a name="line-99"></a>  <span class='hs-comment'>-- The test runner will report a failure if the argument fails.</span>
+<a name="line-100"></a>  <span class='hs-comment'>--</span>
+<a name="line-101"></a>  <span class='hs-comment'>-- Note that inappropriate use of @_concNoTest@ can actually</span>
+<a name="line-102"></a>  <span class='hs-comment'>-- /suppress/ bugs! For this reason it is recommended to use it only</span>
+<a name="line-103"></a>  <span class='hs-comment'>-- for things which don't make use of any state from a larger</span>
+<a name="line-104"></a>  <span class='hs-comment'>-- scope. As a rule-of-thumb: if you can't define it as a top-level</span>
+<a name="line-105"></a>  <span class='hs-comment'>-- function taking no @CVar@ arguments, you probably shouldn't</span>
+<a name="line-106"></a>  <span class='hs-comment'>-- @_concNoTest@ it.</span>
+<a name="line-107"></a>  <span class='hs-sel'>_concNoTest</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>m</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>a</span>
+<a name="line-108"></a>  <span class='hs-sel'>_concNoTest</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>id</span>
+<a name="line-109"></a>
+<a name="line-110"></a><a name="instance%20MonadConc%20IO"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>MonadConc</span> <span class='hs-conid'>IO</span> <span class='hs-keyword'>where</span>
+<a name="line-111"></a>  <span class='hs-keyword'>type</span> <span class='hs-conid'>CVar</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>MVar</span>
+<a name="line-112"></a>
+<a name="line-113"></a>  <span class='hs-varid'>readCVar</span>     <span class='hs-keyglyph'>=</span> <span class='hs-varid'>readMVar</span>
+<a name="line-114"></a>  <span class='hs-varid'>fork</span>         <span class='hs-keyglyph'>=</span> <span class='hs-varid'>void</span> <span class='hs-varop'>.</span> <span class='hs-varid'>forkIO</span>
+<a name="line-115"></a>  <span class='hs-varid'>newEmptyCVar</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>newEmptyMVar</span>
+<a name="line-116"></a>  <span class='hs-varid'>putCVar</span>      <span class='hs-keyglyph'>=</span> <span class='hs-varid'>putMVar</span>
+<a name="line-117"></a>  <span class='hs-varid'>tryPutCVar</span>   <span class='hs-keyglyph'>=</span> <span class='hs-varid'>tryPutMVar</span>
+<a name="line-118"></a>  <span class='hs-varid'>takeCVar</span>     <span class='hs-keyglyph'>=</span> <span class='hs-varid'>takeMVar</span>
+<a name="line-119"></a>  <span class='hs-varid'>tryTakeCVar</span>  <span class='hs-keyglyph'>=</span> <span class='hs-varid'>tryTakeMVar</span>
 </pre></body>
 </html>
