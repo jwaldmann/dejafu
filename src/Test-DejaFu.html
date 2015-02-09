@@ -357,7 +357,8 @@
 <a name="line-348"></a><a name="showfail"></a><span class='hs-comment'>-- | Pretty-print a failure</span>
 <a name="line-349"></a><span class='hs-definition'>showfail</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Failure</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span>
 <a name="line-350"></a><span class='hs-definition'>showfail</span> <span class='hs-conid'>Deadlock</span>        <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[deadlock]"</span>
-<a name="line-351"></a><span class='hs-definition'>showfail</span> <span class='hs-conid'>InternalError</span>   <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[internal-error]"</span>
-<a name="line-352"></a><span class='hs-definition'>showfail</span> <span class='hs-conid'>FailureInNoTest</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[_concNoTest]"</span>
+<a name="line-351"></a><span class='hs-definition'>showfail</span> <span class='hs-conid'>STMDeadlock</span>     <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[stm-deadlock]"</span>
+<a name="line-352"></a><span class='hs-definition'>showfail</span> <span class='hs-conid'>InternalError</span>   <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[internal-error]"</span>
+<a name="line-353"></a><span class='hs-definition'>showfail</span> <span class='hs-conid'>FailureInNoTest</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[_concNoTest]"</span>
 </pre></body>
 </html>
