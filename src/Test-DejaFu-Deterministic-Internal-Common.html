@@ -17,8 +17,8 @@
 <a name="line-8"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>DeepSeq</span> <span class='hs-layout'>(</span><span class='hs-conid'>NFData</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
 <a name="line-9"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Exception</span> <span class='hs-layout'>(</span><span class='hs-conid'>Exception</span><span class='hs-layout'>,</span> <span class='hs-conid'>MaskingState</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-conid'>SomeException</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
 <a name="line-10"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span><span class='hs-varop'>.</span><span class='hs-conid'>Cont</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cont</span><span class='hs-layout'>)</span>
-<a name="line-11"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>State</span>
-<a name="line-12"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>List</span><span class='hs-varop'>.</span><span class='hs-conid'>Extra</span>
+<a name="line-11"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>List</span><span class='hs-varop'>.</span><span class='hs-conid'>Extra</span>
+<a name="line-12"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Test</span><span class='hs-varop'>.</span><span class='hs-conid'>DejaFu</span><span class='hs-varop'>.</span><span class='hs-conid'>Internal</span>
 <a name="line-13"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Test</span><span class='hs-varop'>.</span><span class='hs-conid'>DejaFu</span><span class='hs-varop'>.</span><span class='hs-conid'>STM</span> <span class='hs-layout'>(</span><span class='hs-conid'>CTVarId</span><span class='hs-layout'>)</span>
 <a name="line-14"></a>
 <a name="line-15"></a><span class='hs-comment'>--------------------------------------------------------------------------------</span>
@@ -36,7 +36,7 @@
 <a name="line-27"></a><a name="R"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>R</span> <span class='hs-varid'>r</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-conid'>CRefId</span><span class='hs-layout'>,</span> <span class='hs-varid'>r</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
 <a name="line-28"></a>
 <a name="line-29"></a><a name="Fixed"></a><span class='hs-comment'>-- | Dict of methods for implementations to override.</span>
-<a name="line-30"></a><a name="Fixed"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>Fixed</span> <span class='hs-varid'>n</span> <span class='hs-varid'>r</span> <span class='hs-varid'>s</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Wrapper</span> <span class='hs-varid'>n</span> <span class='hs-varid'>r</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cont</span> <span class='hs-layout'>(</span><span class='hs-conid'>Action</span> <span class='hs-varid'>n</span> <span class='hs-varid'>r</span> <span class='hs-varid'>s</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-30"></a><a name="Fixed"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>Fixed</span> <span class='hs-varid'>n</span> <span class='hs-varid'>r</span> <span class='hs-varid'>s</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Ref</span> <span class='hs-varid'>n</span> <span class='hs-varid'>r</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cont</span> <span class='hs-layout'>(</span><span class='hs-conid'>Action</span> <span class='hs-varid'>n</span> <span class='hs-varid'>r</span> <span class='hs-varid'>s</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
 <a name="line-31"></a>
 <a name="line-32"></a><span class='hs-comment'>--------------------------------------------------------------------------------</span>
 <a name="line-33"></a><span class='hs-comment'>-- * Primitive Actions</span>
@@ -121,22 +121,22 @@
 <a name="line-112"></a><a name="Scheduler"></a><span class='hs-comment'>-- attempts to (a) schedule a blocked thread, or (b) schedule a</span>
 <a name="line-113"></a><a name="Scheduler"></a><span class='hs-comment'>-- nonexistent thread. In either of those cases, the computation will</span>
 <a name="line-114"></a><a name="Scheduler"></a><span class='hs-comment'>-- be halted.</span>
-<a name="line-115"></a><a name="Scheduler"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>Scheduler</span> <span class='hs-varid'>s</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>s</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>ThreadId</span><span class='hs-layout'>,</span> <span class='hs-conid'>ThreadAction</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>NonEmpty</span> <span class='hs-layout'>(</span><span class='hs-conid'>ThreadId</span><span class='hs-layout'>,</span> <span class='hs-conid'>NonEmpty</span> <span class='hs-conid'>ThreadAction'</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-conid'>ThreadId</span><span class='hs-layout'>,</span> <span class='hs-varid'>s</span><span class='hs-layout'>)</span>
+<a name="line-115"></a><a name="Scheduler"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>Scheduler</span> <span class='hs-varid'>s</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>s</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>ThreadId</span><span class='hs-layout'>,</span> <span class='hs-conid'>ThreadAction</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>NonEmpty</span> <span class='hs-layout'>(</span><span class='hs-conid'>ThreadId</span><span class='hs-layout'>,</span> <span class='hs-conid'>NonEmpty</span> <span class='hs-conid'>Lookahead</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-conid'>ThreadId</span><span class='hs-layout'>,</span> <span class='hs-varid'>s</span><span class='hs-layout'>)</span>
 <a name="line-116"></a>
 <a name="line-117"></a><a name="Trace"></a><span class='hs-comment'>-- | One of the outputs of the runner is a @Trace@, which is a log of</span>
 <a name="line-118"></a><a name="Trace"></a><span class='hs-comment'>-- decisions made, alternative decisions (including what action would</span>
 <a name="line-119"></a><a name="Trace"></a><span class='hs-comment'>-- have been performed had that decision been taken), and the action a</span>
 <a name="line-120"></a><a name="Trace"></a><span class='hs-comment'>-- thread took in its step.</span>
-<a name="line-121"></a><a name="Trace"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>Trace</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>Decision</span><span class='hs-layout'>,</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>Decision</span><span class='hs-layout'>,</span> <span class='hs-conid'>ThreadAction'</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>,</span> <span class='hs-conid'>ThreadAction</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span>
+<a name="line-121"></a><a name="Trace"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>Trace</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>Decision</span><span class='hs-layout'>,</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>Decision</span><span class='hs-layout'>,</span> <span class='hs-conid'>Lookahead</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>,</span> <span class='hs-conid'>ThreadAction</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span>
 <a name="line-122"></a>
 <a name="line-123"></a><a name="Trace'"></a><span class='hs-comment'>-- | Like a 'Trace', but gives more lookahead (where possible) for</span>
 <a name="line-124"></a><a name="Trace'"></a><span class='hs-comment'>-- alternative decisions.</span>
-<a name="line-125"></a><a name="Trace'"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>Trace'</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>Decision</span><span class='hs-layout'>,</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>Decision</span><span class='hs-layout'>,</span> <span class='hs-conid'>NonEmpty</span> <span class='hs-conid'>ThreadAction'</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>,</span> <span class='hs-conid'>ThreadAction</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span>
+<a name="line-125"></a><a name="Trace'"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>Trace'</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>Decision</span><span class='hs-layout'>,</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>Decision</span><span class='hs-layout'>,</span> <span class='hs-conid'>NonEmpty</span> <span class='hs-conid'>Lookahead</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>,</span> <span class='hs-conid'>ThreadAction</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span>
 <a name="line-126"></a>
 <a name="line-127"></a><a name="toTrace"></a><span class='hs-comment'>-- | Throw away information from a 'Trace'' to get just a 'Trace'.</span>
 <a name="line-128"></a><span class='hs-definition'>toTrace</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Trace'</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Trace</span>
-<a name="line-129"></a><span class='hs-definition'>toTrace</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varid'>d</span><span class='hs-layout'>,</span> <span class='hs-varid'>alters</span><span class='hs-layout'>,</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span><span class='hs-conop'>:</span><span class='hs-varid'>ts</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>d</span><span class='hs-layout'>,</span> <span class='hs-varid'>map</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-layout'>(</span><span class='hs-varid'>d</span><span class='hs-layout'>,</span> <span class='hs-varid'>a</span><span class='hs-conop'>:|</span><span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>d</span><span class='hs-layout'>,</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varid'>alters</span><span class='hs-layout'>,</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-conop'>:</span> <span class='hs-varid'>toTrace</span> <span class='hs-varid'>ts</span>
-<a name="line-130"></a><span class='hs-definition'>toTrace</span> <span class='hs-conid'>[]</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>[]</span>
+<a name="line-129"></a><span class='hs-definition'>toTrace</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>map</span> <span class='hs-varid'>go</span> <span class='hs-keyword'>where</span>
+<a name="line-130"></a>  <span class='hs-varid'>go</span> <span class='hs-layout'>(</span><span class='hs-varid'>dec</span><span class='hs-layout'>,</span> <span class='hs-varid'>alters</span><span class='hs-layout'>,</span> <span class='hs-varid'>act</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>dec</span><span class='hs-layout'>,</span> <span class='hs-varid'>map</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-layout'>(</span><span class='hs-varid'>d</span><span class='hs-layout'>,</span> <span class='hs-varid'>a</span><span class='hs-conop'>:|</span><span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>d</span><span class='hs-layout'>,</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varid'>alters</span><span class='hs-layout'>,</span> <span class='hs-varid'>act</span><span class='hs-layout'>)</span>
 <a name="line-131"></a>
 <a name="line-132"></a><a name="showTrace"></a><span class='hs-comment'>-- | Pretty-print a trace.</span>
 <a name="line-133"></a><span class='hs-definition'>showTrace</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Trace</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span>
@@ -258,101 +258,99 @@
 <a name="line-249"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>Read</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
 <a name="line-250"></a>  <span class='hs-varid'>rnf</span> <span class='hs-varid'>ta</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>ta</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span>
 <a name="line-251"></a>
-<a name="line-252"></a><a name="ThreadAction'"></a><span class='hs-comment'>-- | A simplified view of the actions that a thread can perform.</span>
-<a name="line-253"></a><a name="ThreadAction'"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>ThreadAction'</span> <span class='hs-keyglyph'>=</span>
-<a name="line-254"></a>    <span class='hs-conid'>Fork'</span>
-<a name="line-255"></a>  <span class='hs-comment'>-- ^ Start a new thread.</span>
-<a name="line-256"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>MyThreadId'</span>
-<a name="line-257"></a>  <span class='hs-comment'>-- ^ Get the 'ThreadId' of the current thread.</span>
-<a name="line-258"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>New'</span>
-<a name="line-259"></a>  <span class='hs-comment'>-- ^ Create a new 'CVar'.</span>
-<a name="line-260"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Put'</span> <span class='hs-conid'>CVarId</span>
-<a name="line-261"></a>  <span class='hs-comment'>-- ^ Put into a 'CVar', possibly waking up some threads.</span>
-<a name="line-262"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>TryPut'</span> <span class='hs-conid'>CVarId</span>
-<a name="line-263"></a>  <span class='hs-comment'>-- ^ Try to put into a 'CVar', possibly waking up some threads.</span>
-<a name="line-264"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Read'</span> <span class='hs-conid'>CVarId</span>
-<a name="line-265"></a>  <span class='hs-comment'>-- ^ Read from a 'CVar'.</span>
-<a name="line-266"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Take'</span> <span class='hs-conid'>CVarId</span>
-<a name="line-267"></a>  <span class='hs-comment'>-- ^ Take from a 'CVar', possibly waking up some threads.</span>
-<a name="line-268"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>TryTake'</span> <span class='hs-conid'>CVarId</span>
-<a name="line-269"></a>  <span class='hs-comment'>-- ^ Try to take from a 'CVar', possibly waking up some threads.</span>
-<a name="line-270"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>NewRef'</span>
-<a name="line-271"></a>  <span class='hs-comment'>-- ^ Create a new 'CRef'.</span>
-<a name="line-272"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>ReadRef'</span> <span class='hs-conid'>CRefId</span>
-<a name="line-273"></a>  <span class='hs-comment'>-- ^ Read from a 'CRef'.</span>
-<a name="line-274"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>ModRef'</span> <span class='hs-conid'>CRefId</span>
-<a name="line-275"></a>  <span class='hs-comment'>-- ^ Modify a 'CRef'.</span>
-<a name="line-276"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>STM'</span>
-<a name="line-277"></a>  <span class='hs-comment'>-- ^ An STM transaction was executed, possibly waking up some</span>
+<a name="line-252"></a><a name="Lookahead"></a><span class='hs-comment'>-- | A one-step look-ahead at what a thread will do next.</span>
+<a name="line-253"></a><a name="Lookahead"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Lookahead</span> <span class='hs-keyglyph'>=</span>
+<a name="line-254"></a>    <span class='hs-conid'>WillFork</span>
+<a name="line-255"></a>  <span class='hs-comment'>-- ^ Will start a new thread.</span>
+<a name="line-256"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillMyThreadId</span>
+<a name="line-257"></a>  <span class='hs-comment'>-- ^ Will get the 'ThreadId'.</span>
+<a name="line-258"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillNew</span>
+<a name="line-259"></a>  <span class='hs-comment'>-- ^ Will create a new 'CVar'.</span>
+<a name="line-260"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillPut</span> <span class='hs-conid'>CVarId</span>
+<a name="line-261"></a>  <span class='hs-comment'>-- ^ Will put into a 'CVar', possibly waking up some threads.</span>
+<a name="line-262"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillTryPut</span> <span class='hs-conid'>CVarId</span>
+<a name="line-263"></a>  <span class='hs-comment'>-- ^ Will try to put into a 'CVar', possibly waking up some threads.</span>
+<a name="line-264"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillRead</span> <span class='hs-conid'>CVarId</span>
+<a name="line-265"></a>  <span class='hs-comment'>-- ^ Will read from a 'CVar'.</span>
+<a name="line-266"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillTake</span> <span class='hs-conid'>CVarId</span>
+<a name="line-267"></a>  <span class='hs-comment'>-- ^ Will take from a 'CVar', possibly waking up some threads.</span>
+<a name="line-268"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillTryTake</span> <span class='hs-conid'>CVarId</span>
+<a name="line-269"></a>  <span class='hs-comment'>-- ^ Will try to take from a 'CVar', possibly waking up some threads.</span>
+<a name="line-270"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillNewRef</span>
+<a name="line-271"></a>  <span class='hs-comment'>-- ^ Will create a new 'CRef'.</span>
+<a name="line-272"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillReadRef</span> <span class='hs-conid'>CRefId</span>
+<a name="line-273"></a>  <span class='hs-comment'>-- ^ Will read from a 'CRef'.</span>
+<a name="line-274"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillModRef</span> <span class='hs-conid'>CRefId</span>
+<a name="line-275"></a>  <span class='hs-comment'>-- ^ Will modify a 'CRef'.</span>
+<a name="line-276"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillSTM</span>
+<a name="line-277"></a>  <span class='hs-comment'>-- ^ Will execute an STM transaction, possibly waking up some</span>
 <a name="line-278"></a>  <span class='hs-comment'>-- threads.</span>
-<a name="line-279"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Catching'</span>
-<a name="line-280"></a>  <span class='hs-comment'>-- ^ Register a new exception handler</span>
-<a name="line-281"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>PopCatching'</span>
-<a name="line-282"></a>  <span class='hs-comment'>-- ^ Pop the innermost exception handler from the stack.</span>
-<a name="line-283"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Throw'</span>
-<a name="line-284"></a>  <span class='hs-comment'>-- ^ Throw an exception.</span>
-<a name="line-285"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>ThrowTo'</span> <span class='hs-conid'>ThreadId</span>
-<a name="line-286"></a>  <span class='hs-comment'>-- ^ Throw an exception to a thread.</span>
-<a name="line-287"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Killed'</span>
-<a name="line-288"></a>  <span class='hs-comment'>-- ^ Killed by an uncaught exception.</span>
-<a name="line-289"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>SetMasking'</span> <span class='hs-conid'>Bool</span> <span class='hs-conid'>MaskingState</span>
-<a name="line-290"></a>  <span class='hs-comment'>-- ^ Set the masking state. If 'True', this is being used to set the</span>
-<a name="line-291"></a>  <span class='hs-comment'>-- masking state to the original state in the argument passed to a</span>
-<a name="line-292"></a>  <span class='hs-comment'>-- 'mask'ed function.</span>
-<a name="line-293"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>ResetMasking'</span> <span class='hs-conid'>Bool</span> <span class='hs-conid'>MaskingState</span>
-<a name="line-294"></a>  <span class='hs-comment'>-- ^ Return to an earlier masking state.  If 'True', this is being</span>
-<a name="line-295"></a>  <span class='hs-comment'>-- used to return to the state of the masked block in the argument</span>
-<a name="line-296"></a>  <span class='hs-comment'>-- passed to a 'mask'ed function.</span>
-<a name="line-297"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Lift'</span>
-<a name="line-298"></a>  <span class='hs-comment'>-- ^ Lift an action from the underlying monad. Note that the</span>
-<a name="line-299"></a>  <span class='hs-comment'>-- penultimate action in a trace will always be a @Lift@, this is an</span>
-<a name="line-300"></a>  <span class='hs-comment'>-- artefact of how the runner works.</span>
-<a name="line-301"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>NoTest'</span>
-<a name="line-302"></a>  <span class='hs-comment'>-- ^ A computation annotated with '_concNoTest' was executed in a</span>
-<a name="line-303"></a>  <span class='hs-comment'>-- single step.</span>
-<a name="line-304"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>KnowsAbout'</span>
-<a name="line-305"></a>  <span class='hs-comment'>-- ^ A '_concKnowsAbout' annotation was processed.</span>
-<a name="line-306"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Forgets'</span>
-<a name="line-307"></a>  <span class='hs-comment'>-- ^ A '_concForgets' annotation was processed.</span>
-<a name="line-308"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>AllKnown'</span>
-<a name="line-309"></a>  <span class='hs-comment'>-- ^ A '_concALlKnown' annotation was processed.</span>
-<a name="line-310"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Stop'</span>
-<a name="line-311"></a>  <span class='hs-comment'>-- ^ Cease execution and terminate.</span>
-<a name="line-312"></a>  <span class='hs-keyword'>deriving</span> <span class='hs-layout'>(</span><span class='hs-conid'>Eq</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span><span class='hs-layout'>)</span>
-<a name="line-313"></a>
-<a name="line-314"></a><a name="instance%20NFData%20ThreadAction'"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>NFData</span> <span class='hs-conid'>ThreadAction'</span> <span class='hs-keyword'>where</span>
-<a name="line-315"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>SetMasking'</span>   <span class='hs-varid'>b</span> <span class='hs-varid'>ms</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>b</span> <span class='hs-varop'>`seq`</span> <span class='hs-varid'>ms</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span>
-<a name="line-316"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>ResetMasking'</span> <span class='hs-varid'>b</span> <span class='hs-varid'>ms</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>b</span> <span class='hs-varop'>`seq`</span> <span class='hs-varid'>ms</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span>
-<a name="line-317"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>Put'</span>     <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
-<a name="line-318"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>TryPut'</span>  <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
-<a name="line-319"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>Read'</span>    <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
-<a name="line-320"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>Take'</span>    <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
-<a name="line-321"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>TryTake'</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
-<a name="line-322"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>ReadRef'</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
-<a name="line-323"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>ModRef'</span>  <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
-<a name="line-324"></a>  <span class='hs-varid'>rnf</span> <span class='hs-varid'>ta</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>ta</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span>
-<a name="line-325"></a>
-<a name="line-326"></a><span class='hs-comment'>--------------------------------------------------------------------------------</span>
-<a name="line-327"></a><span class='hs-comment'>-- * Failures</span>
-<a name="line-328"></a>
-<a name="line-329"></a><a name="Failure"></a><span class='hs-comment'>-- | An indication of how a concurrent computation failed.</span>
-<a name="line-330"></a><a name="Failure"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Failure</span> <span class='hs-keyglyph'>=</span>
-<a name="line-331"></a>    <span class='hs-conid'>InternalError</span>
-<a name="line-332"></a>  <span class='hs-comment'>-- ^ Will be raised if the scheduler does something bad. This should</span>
-<a name="line-333"></a>  <span class='hs-comment'>-- never arise unless you write your own, faulty, scheduler! If it</span>
-<a name="line-334"></a>  <span class='hs-comment'>-- does, please file a bug report.</span>
-<a name="line-335"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Deadlock</span>
-<a name="line-336"></a>  <span class='hs-comment'>-- ^ The computation became blocked indefinitely on @CVar@s.</span>
-<a name="line-337"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>STMDeadlock</span>
-<a name="line-338"></a>  <span class='hs-comment'>-- ^ The computation became blocked indefinitely on @CTVar@s.</span>
-<a name="line-339"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>UncaughtException</span>
-<a name="line-340"></a>  <span class='hs-comment'>-- ^ An uncaught exception bubbled to the top of the computation.</span>
-<a name="line-341"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>FailureInNoTest</span>
-<a name="line-342"></a>  <span class='hs-comment'>-- ^ A computation annotated with '_concNoTest' produced a failure,</span>
-<a name="line-343"></a>  <span class='hs-comment'>-- rather than a result.</span>
-<a name="line-344"></a>  <span class='hs-keyword'>deriving</span> <span class='hs-layout'>(</span><span class='hs-conid'>Eq</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span><span class='hs-layout'>)</span>
-<a name="line-345"></a>
-<a name="line-346"></a><a name="instance%20NFData%20Failure"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>NFData</span> <span class='hs-conid'>Failure</span> <span class='hs-keyword'>where</span>
-<a name="line-347"></a>  <span class='hs-varid'>rnf</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span> <span class='hs-comment'>-- WHNF == NF</span>
+<a name="line-279"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillCatching</span>
+<a name="line-280"></a>  <span class='hs-comment'>-- ^ Will register a new exception handler</span>
+<a name="line-281"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillPopCatching</span>
+<a name="line-282"></a>  <span class='hs-comment'>-- ^ Will pop the innermost exception handler from the stack.</span>
+<a name="line-283"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillThrow</span>
+<a name="line-284"></a>  <span class='hs-comment'>-- ^ Will throw an exception.</span>
+<a name="line-285"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillThrowTo</span> <span class='hs-conid'>ThreadId</span>
+<a name="line-286"></a>  <span class='hs-comment'>-- ^ Will throw an exception to a thread.</span>
+<a name="line-287"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillSetMasking</span> <span class='hs-conid'>Bool</span> <span class='hs-conid'>MaskingState</span>
+<a name="line-288"></a>  <span class='hs-comment'>-- ^ Will set the masking state. If 'True', this is being used to</span>
+<a name="line-289"></a>  <span class='hs-comment'>-- set the masking state to the original state in the argument</span>
+<a name="line-290"></a>  <span class='hs-comment'>-- passed to a 'mask'ed function.</span>
+<a name="line-291"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillResetMasking</span> <span class='hs-conid'>Bool</span> <span class='hs-conid'>MaskingState</span>
+<a name="line-292"></a>  <span class='hs-comment'>-- ^ Will return to an earlier masking state.  If 'True', this is</span>
+<a name="line-293"></a>  <span class='hs-comment'>-- being used to return to the state of the masked block in the</span>
+<a name="line-294"></a>  <span class='hs-comment'>-- argument passed to a 'mask'ed function.</span>
+<a name="line-295"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillLift</span>
+<a name="line-296"></a>  <span class='hs-comment'>-- ^ Will lift an action from the underlying monad. Note that the</span>
+<a name="line-297"></a>  <span class='hs-comment'>-- penultimate action in a trace will always be a @Lift@, this is an</span>
+<a name="line-298"></a>  <span class='hs-comment'>-- artefact of how the runner works.</span>
+<a name="line-299"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillNoTest</span>
+<a name="line-300"></a>  <span class='hs-comment'>-- ^ Will execute a computation annotated with '_concNoTest' in a</span>
+<a name="line-301"></a>  <span class='hs-comment'>-- single step.</span>
+<a name="line-302"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillKnowsAbout</span>
+<a name="line-303"></a>  <span class='hs-comment'>-- ^ Will process a '_concKnowsAbout' annotation.</span>
+<a name="line-304"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillForgets</span>
+<a name="line-305"></a>  <span class='hs-comment'>-- ^ Will process a '_concForgets' annotation.</span>
+<a name="line-306"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillAllKnown</span>
+<a name="line-307"></a>  <span class='hs-comment'>-- ^ Will process a '_concALlKnown' annotation.</span>
+<a name="line-308"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>WillStop</span>
+<a name="line-309"></a>  <span class='hs-comment'>-- ^ Will cease execution and terminate.</span>
+<a name="line-310"></a>  <span class='hs-keyword'>deriving</span> <span class='hs-layout'>(</span><span class='hs-conid'>Eq</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span><span class='hs-layout'>)</span>
+<a name="line-311"></a>
+<a name="line-312"></a><a name="instance%20NFData%20Lookahead"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>NFData</span> <span class='hs-conid'>Lookahead</span> <span class='hs-keyword'>where</span>
+<a name="line-313"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillSetMasking</span>   <span class='hs-varid'>b</span> <span class='hs-varid'>ms</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>b</span> <span class='hs-varop'>`seq`</span> <span class='hs-varid'>ms</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span>
+<a name="line-314"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillResetMasking</span> <span class='hs-varid'>b</span> <span class='hs-varid'>ms</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>b</span> <span class='hs-varop'>`seq`</span> <span class='hs-varid'>ms</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span>
+<a name="line-315"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillPut</span>     <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
+<a name="line-316"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillTryPut</span>  <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
+<a name="line-317"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillRead</span>    <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
+<a name="line-318"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillTake</span>    <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
+<a name="line-319"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillTryTake</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
+<a name="line-320"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillReadRef</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
+<a name="line-321"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillModRef</span>  <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
+<a name="line-322"></a>  <span class='hs-varid'>rnf</span> <span class='hs-varid'>ta</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>ta</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span>
+<a name="line-323"></a>
+<a name="line-324"></a><span class='hs-comment'>--------------------------------------------------------------------------------</span>
+<a name="line-325"></a><span class='hs-comment'>-- * Failures</span>
+<a name="line-326"></a>
+<a name="line-327"></a><a name="Failure"></a><span class='hs-comment'>-- | An indication of how a concurrent computation failed.</span>
+<a name="line-328"></a><a name="Failure"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Failure</span> <span class='hs-keyglyph'>=</span>
+<a name="line-329"></a>    <span class='hs-conid'>InternalError</span>
+<a name="line-330"></a>  <span class='hs-comment'>-- ^ Will be raised if the scheduler does something bad. This should</span>
+<a name="line-331"></a>  <span class='hs-comment'>-- never arise unless you write your own, faulty, scheduler! If it</span>
+<a name="line-332"></a>  <span class='hs-comment'>-- does, please file a bug report.</span>
+<a name="line-333"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Deadlock</span>
+<a name="line-334"></a>  <span class='hs-comment'>-- ^ The computation became blocked indefinitely on @CVar@s.</span>
+<a name="line-335"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>STMDeadlock</span>
+<a name="line-336"></a>  <span class='hs-comment'>-- ^ The computation became blocked indefinitely on @CTVar@s.</span>
+<a name="line-337"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>UncaughtException</span>
+<a name="line-338"></a>  <span class='hs-comment'>-- ^ An uncaught exception bubbled to the top of the computation.</span>
+<a name="line-339"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>FailureInNoTest</span>
+<a name="line-340"></a>  <span class='hs-comment'>-- ^ A computation annotated with '_concNoTest' produced a failure,</span>
+<a name="line-341"></a>  <span class='hs-comment'>-- rather than a result.</span>
+<a name="line-342"></a>  <span class='hs-keyword'>deriving</span> <span class='hs-layout'>(</span><span class='hs-conid'>Eq</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span><span class='hs-layout'>)</span>
+<a name="line-343"></a>
+<a name="line-344"></a><a name="instance%20NFData%20Failure"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>NFData</span> <span class='hs-conid'>Failure</span> <span class='hs-keyword'>where</span>
+<a name="line-345"></a>  <span class='hs-varid'>rnf</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span> <span class='hs-comment'>-- WHNF == NF</span>
 </pre></body>
 </html>
