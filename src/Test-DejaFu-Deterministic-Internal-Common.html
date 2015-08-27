@@ -77,10 +77,10 @@
 <a name="line-68"></a><a name="ThreadId"></a><span class='hs-comment'>-- | Every live thread has a unique identitifer.</span>
 <a name="line-69"></a><a name="ThreadId"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>ThreadId</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Int</span>
 <a name="line-70"></a>
-<a name="line-71"></a><a name="CVarId"></a><span class='hs-comment'>-- | Every 'CVar' also has a unique identifier.</span>
+<a name="line-71"></a><a name="CVarId"></a><span class='hs-comment'>-- | Every 'CVar' has a unique identifier.</span>
 <a name="line-72"></a><a name="CVarId"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>CVarId</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Int</span>
 <a name="line-73"></a>
-<a name="line-74"></a><a name="CRefId"></a><span class='hs-comment'>-- | Every 'CRef' also has a unique identifier.</span>
+<a name="line-74"></a><a name="CRefId"></a><span class='hs-comment'>-- | Every 'CRef' has a unique identifier.</span>
 <a name="line-75"></a><a name="CRefId"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>CRefId</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Int</span>
 <a name="line-76"></a>
 <a name="line-77"></a><a name="IdSource"></a><span class='hs-comment'>-- | The number of ID parameters was getting a bit unwieldy, so this</span>
@@ -116,7 +116,7 @@
 <a name="line-107"></a><a name="Scheduler"></a><span class='hs-comment'>-- what each will do in the next steps (as far as can be</span>
 <a name="line-108"></a><a name="Scheduler"></a><span class='hs-comment'>-- determined). It produces a 'ThreadId' to schedule, and a new state.</span>
 <a name="line-109"></a><a name="Scheduler"></a><span class='hs-comment'>--</span>
-<a name="line-110"></a><a name="Scheduler"></a><span class='hs-comment'>-- Note: In order to prevent computation from hanging, the runtime</span>
+<a name="line-110"></a><a name="Scheduler"></a><span class='hs-comment'>-- __Note:__ In order to prevent computation from hanging, the runtime</span>
 <a name="line-111"></a><a name="Scheduler"></a><span class='hs-comment'>-- will assume that a deadlock situation has arisen if the scheduler</span>
 <a name="line-112"></a><a name="Scheduler"></a><span class='hs-comment'>-- attempts to (a) schedule a blocked thread, or (b) schedule a</span>
 <a name="line-113"></a><a name="Scheduler"></a><span class='hs-comment'>-- nonexistent thread. In either of those cases, the computation will</span>
