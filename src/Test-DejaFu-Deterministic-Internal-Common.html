@@ -386,117 +386,122 @@
 <a name="line-377"></a>  <span class='hs-varid'>rnf</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedWrite</span>   <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rnf</span> <span class='hs-varid'>c</span>
 <a name="line-378"></a>  <span class='hs-varid'>rnf</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>a</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span>
 <a name="line-379"></a>
-<a name="line-380"></a><a name="isSynchronised"></a><span class='hs-comment'>-- | Check if an action is synchronised</span>
-<a name="line-381"></a><span class='hs-definition'>isSynchronised</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ActionType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
-<a name="line-382"></a><span class='hs-definition'>isSynchronised</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedModify</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
-<a name="line-383"></a><span class='hs-definition'>isSynchronised</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedCommit</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
-<a name="line-384"></a><span class='hs-definition'>isSynchronised</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedRead</span>   <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
-<a name="line-385"></a><span class='hs-definition'>isSynchronised</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedWrite</span>  <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
-<a name="line-386"></a><span class='hs-definition'>isSynchronised</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
+<a name="line-380"></a><a name="isBarrier"></a><span class='hs-comment'>-- | Check if an action imposes a write barrier.</span>
+<a name="line-381"></a><span class='hs-definition'>isBarrier</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ActionType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
+<a name="line-382"></a><span class='hs-definition'>isBarrier</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedModify</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
+<a name="line-383"></a><span class='hs-definition'>isBarrier</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedRead</span>   <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
+<a name="line-384"></a><span class='hs-definition'>isBarrier</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedWrite</span>  <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
+<a name="line-385"></a><span class='hs-definition'>isBarrier</span> <span class='hs-conid'>SynchronisedOther</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
+<a name="line-386"></a><span class='hs-definition'>isBarrier</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
 <a name="line-387"></a>
-<a name="line-388"></a><a name="crefOf"></a><span class='hs-comment'>-- | Get the 'CRef' affected.</span>
-<a name="line-389"></a><span class='hs-definition'>crefOf</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ActionType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Maybe</span> <span class='hs-conid'>CRefId</span>
-<a name="line-390"></a><span class='hs-definition'>crefOf</span> <span class='hs-layout'>(</span><span class='hs-conid'>UnsynchronisedRead</span>  <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varid'>r</span>
-<a name="line-391"></a><span class='hs-definition'>crefOf</span> <span class='hs-layout'>(</span><span class='hs-conid'>UnsynchronisedWrite</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varid'>r</span>
-<a name="line-392"></a><span class='hs-definition'>crefOf</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedModify</span>  <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varid'>r</span>
-<a name="line-393"></a><span class='hs-definition'>crefOf</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedCommit</span>  <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varid'>r</span>
-<a name="line-394"></a><span class='hs-definition'>crefOf</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Nothing</span>
-<a name="line-395"></a>
-<a name="line-396"></a><a name="cvarOf"></a><span class='hs-comment'>-- | Get the 'CVar' affected.</span>
-<a name="line-397"></a><span class='hs-definition'>cvarOf</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ActionType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Maybe</span> <span class='hs-conid'>CVarId</span>
-<a name="line-398"></a><span class='hs-definition'>cvarOf</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedRead</span>  <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varid'>c</span>
-<a name="line-399"></a><span class='hs-definition'>cvarOf</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedWrite</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varid'>c</span>
-<a name="line-400"></a><span class='hs-definition'>cvarOf</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Nothing</span>
-<a name="line-401"></a>
-<a name="line-402"></a><a name="simplify"></a><span class='hs-comment'>-- | Throw away information from a 'ThreadAction' and give a</span>
-<a name="line-403"></a><span class='hs-comment'>-- simplified view of what is happening.</span>
-<a name="line-404"></a><span class='hs-comment'>--</span>
-<a name="line-405"></a><span class='hs-comment'>-- This is used in the SCT code to help determine interesting</span>
-<a name="line-406"></a><span class='hs-comment'>-- alternative scheduling decisions.</span>
-<a name="line-407"></a><span class='hs-definition'>simplify</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ThreadAction</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>ActionType</span>
-<a name="line-408"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>Put</span> <span class='hs-varid'>c</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>       <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedWrite</span> <span class='hs-varid'>c</span>
-<a name="line-409"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>BlockedPut</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
-<a name="line-410"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>TryPut</span> <span class='hs-varid'>c</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedWrite</span> <span class='hs-varid'>c</span>
-<a name="line-411"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>Read</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>        <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedRead</span> <span class='hs-varid'>c</span>
-<a name="line-412"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>BlockedRead</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
-<a name="line-413"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>Take</span> <span class='hs-varid'>c</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedRead</span> <span class='hs-varid'>c</span>
-<a name="line-414"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>BlockedTake</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
-<a name="line-415"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>TryTake</span> <span class='hs-varid'>c</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedRead</span> <span class='hs-varid'>c</span>
-<a name="line-416"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>ReadRef</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>     <span class='hs-keyglyph'>=</span> <span class='hs-conid'>UnsynchronisedRead</span> <span class='hs-varid'>r</span>
-<a name="line-417"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>ModRef</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedModify</span> <span class='hs-varid'>r</span>
-<a name="line-418"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>WriteRef</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>    <span class='hs-keyglyph'>=</span> <span class='hs-conid'>UnsynchronisedWrite</span> <span class='hs-varid'>r</span>
-<a name="line-419"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>CommitRef</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedCommit</span> <span class='hs-varid'>r</span>
-<a name="line-420"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>STM</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>            <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
-<a name="line-421"></a><span class='hs-definition'>simplify</span> <span class='hs-conid'>BlockedSTM</span>         <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
-<a name="line-422"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>ThrowTo</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>        <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
-<a name="line-423"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>BlockedThrowTo</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
-<a name="line-424"></a><span class='hs-definition'>simplify</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>UnsynchronisedOther</span>
-<a name="line-425"></a>
-<a name="line-426"></a><a name="simplify'"></a><span class='hs-comment'>-- | Variant of 'simplify' that takes a 'Lookahead'.</span>
-<a name="line-427"></a><span class='hs-definition'>simplify'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Lookahead</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>ActionType</span>
-<a name="line-428"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillPut</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>         <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedWrite</span> <span class='hs-varid'>c</span>
-<a name="line-429"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillTryPut</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedWrite</span> <span class='hs-varid'>c</span>
-<a name="line-430"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillRead</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>        <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedRead</span> <span class='hs-varid'>c</span>
-<a name="line-431"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillTake</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>        <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedRead</span> <span class='hs-varid'>c</span>
-<a name="line-432"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillTryTake</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>     <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedRead</span> <span class='hs-varid'>c</span>
-<a name="line-433"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillReadRef</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>     <span class='hs-keyglyph'>=</span> <span class='hs-conid'>UnsynchronisedRead</span> <span class='hs-varid'>r</span>
-<a name="line-434"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillModRef</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedModify</span> <span class='hs-varid'>r</span>
-<a name="line-435"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillWriteRef</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>    <span class='hs-keyglyph'>=</span> <span class='hs-conid'>UnsynchronisedWrite</span> <span class='hs-varid'>r</span>
-<a name="line-436"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillCommitRef</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedCommit</span> <span class='hs-varid'>r</span>
-<a name="line-437"></a><span class='hs-definition'>simplify'</span> <span class='hs-conid'>WillSTM</span>         <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
-<a name="line-438"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillThrowTo</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
-<a name="line-439"></a><span class='hs-definition'>simplify'</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>UnsynchronisedOther</span>
-<a name="line-440"></a>
-<a name="line-441"></a><span class='hs-comment'>--------------------------------------------------------------------------------</span>
-<a name="line-442"></a><span class='hs-comment'>-- * Failures</span>
-<a name="line-443"></a>
-<a name="line-444"></a><a name="Failure"></a><span class='hs-comment'>-- | An indication of how a concurrent computation failed.</span>
-<a name="line-445"></a><a name="Failure"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Failure</span> <span class='hs-keyglyph'>=</span>
-<a name="line-446"></a>    <span class='hs-conid'>InternalError</span>
-<a name="line-447"></a>  <span class='hs-comment'>-- ^ Will be raised if the scheduler does something bad. This should</span>
-<a name="line-448"></a>  <span class='hs-comment'>-- never arise unless you write your own, faulty, scheduler! If it</span>
-<a name="line-449"></a>  <span class='hs-comment'>-- does, please file a bug report.</span>
-<a name="line-450"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Deadlock</span>
-<a name="line-451"></a>  <span class='hs-comment'>-- ^ The computation became blocked indefinitely on @CVar@s.</span>
-<a name="line-452"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>STMDeadlock</span>
-<a name="line-453"></a>  <span class='hs-comment'>-- ^ The computation became blocked indefinitely on @CTVar@s.</span>
-<a name="line-454"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>UncaughtException</span>
-<a name="line-455"></a>  <span class='hs-comment'>-- ^ An uncaught exception bubbled to the top of the computation.</span>
-<a name="line-456"></a>  <span class='hs-keyword'>deriving</span> <span class='hs-layout'>(</span><span class='hs-conid'>Eq</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span><span class='hs-layout'>)</span>
-<a name="line-457"></a>
-<a name="line-458"></a><a name="instance%20NFData%20Failure"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>NFData</span> <span class='hs-conid'>Failure</span> <span class='hs-keyword'>where</span>
-<a name="line-459"></a>  <span class='hs-varid'>rnf</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span> <span class='hs-comment'>-- WHNF == NF</span>
-<a name="line-460"></a>
-<a name="line-461"></a><a name="showFail"></a><span class='hs-comment'>-- | Pretty-print a failure</span>
-<a name="line-462"></a><span class='hs-definition'>showFail</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Failure</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span>
-<a name="line-463"></a><span class='hs-definition'>showFail</span> <span class='hs-conid'>Deadlock</span>          <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[deadlock]"</span>
-<a name="line-464"></a><span class='hs-definition'>showFail</span> <span class='hs-conid'>STMDeadlock</span>       <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[stm-deadlock]"</span>
-<a name="line-465"></a><span class='hs-definition'>showFail</span> <span class='hs-conid'>InternalError</span>     <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[internal-error]"</span>
-<a name="line-466"></a><span class='hs-definition'>showFail</span> <span class='hs-conid'>UncaughtException</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[exception]"</span>
-<a name="line-467"></a>
-<a name="line-468"></a><span class='hs-comment'>--------------------------------------------------------------------------------</span>
-<a name="line-469"></a><span class='hs-comment'>-- * Memory Models</span>
-<a name="line-470"></a>
-<a name="line-471"></a><a name="MemType"></a><span class='hs-comment'>-- | The memory model to use for non-synchronised 'CRef' operations.</span>
-<a name="line-472"></a><a name="MemType"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>MemType</span> <span class='hs-keyglyph'>=</span>
-<a name="line-473"></a>    <span class='hs-conid'>SequentialConsistency</span>
-<a name="line-474"></a>  <span class='hs-comment'>-- ^ The most intuitive model: a program behaves as a simple</span>
-<a name="line-475"></a>  <span class='hs-comment'>-- interleaving of the actions in different threads. When a 'CRef'</span>
-<a name="line-476"></a>  <span class='hs-comment'>-- is written to, that write is immediately visible to all threads.</span>
-<a name="line-477"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>TotalStoreOrder</span>
-<a name="line-478"></a>  <span class='hs-comment'>-- ^ Each thread has a write buffer. A thread sees its writes</span>
-<a name="line-479"></a>  <span class='hs-comment'>-- immediately, but other threads will only see writes when they are</span>
-<a name="line-480"></a>  <span class='hs-comment'>-- committed, which may happen later. Writes are committed in the</span>
-<a name="line-481"></a>  <span class='hs-comment'>-- same order that they are created.</span>
-<a name="line-482"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>PartialStoreOrder</span>
-<a name="line-483"></a>  <span class='hs-comment'>-- ^ Each 'CRef' has a write buffer. A thread sees its writes</span>
+<a name="line-388"></a><a name="isSynchronised"></a><span class='hs-comment'>-- | Check if an action is synchronised.</span>
+<a name="line-389"></a><span class='hs-definition'>isSynchronised</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ActionType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
+<a name="line-390"></a><span class='hs-definition'>isSynchronised</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedCommit</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
+<a name="line-391"></a><span class='hs-definition'>isSynchronised</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>isBarrier</span> <span class='hs-varid'>a</span>
+<a name="line-392"></a>
+<a name="line-393"></a><a name="crefOf"></a><span class='hs-comment'>-- | Get the 'CRef' affected.</span>
+<a name="line-394"></a><span class='hs-definition'>crefOf</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ActionType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Maybe</span> <span class='hs-conid'>CRefId</span>
+<a name="line-395"></a><span class='hs-definition'>crefOf</span> <span class='hs-layout'>(</span><span class='hs-conid'>UnsynchronisedRead</span>  <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varid'>r</span>
+<a name="line-396"></a><span class='hs-definition'>crefOf</span> <span class='hs-layout'>(</span><span class='hs-conid'>UnsynchronisedWrite</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varid'>r</span>
+<a name="line-397"></a><span class='hs-definition'>crefOf</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedModify</span>  <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varid'>r</span>
+<a name="line-398"></a><span class='hs-definition'>crefOf</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedCommit</span>  <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varid'>r</span>
+<a name="line-399"></a><span class='hs-definition'>crefOf</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Nothing</span>
+<a name="line-400"></a>
+<a name="line-401"></a><a name="cvarOf"></a><span class='hs-comment'>-- | Get the 'CVar' affected.</span>
+<a name="line-402"></a><span class='hs-definition'>cvarOf</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ActionType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Maybe</span> <span class='hs-conid'>CVarId</span>
+<a name="line-403"></a><span class='hs-definition'>cvarOf</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedRead</span>  <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varid'>c</span>
+<a name="line-404"></a><span class='hs-definition'>cvarOf</span> <span class='hs-layout'>(</span><span class='hs-conid'>SynchronisedWrite</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varid'>c</span>
+<a name="line-405"></a><span class='hs-definition'>cvarOf</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Nothing</span>
+<a name="line-406"></a>
+<a name="line-407"></a><a name="simplify"></a><span class='hs-comment'>-- | Throw away information from a 'ThreadAction' and give a</span>
+<a name="line-408"></a><span class='hs-comment'>-- simplified view of what is happening.</span>
+<a name="line-409"></a><span class='hs-comment'>--</span>
+<a name="line-410"></a><span class='hs-comment'>-- This is used in the SCT code to help determine interesting</span>
+<a name="line-411"></a><span class='hs-comment'>-- alternative scheduling decisions.</span>
+<a name="line-412"></a><span class='hs-definition'>simplify</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>ThreadAction</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>ActionType</span>
+<a name="line-413"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>Put</span> <span class='hs-varid'>c</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>       <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedWrite</span> <span class='hs-varid'>c</span>
+<a name="line-414"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>BlockedPut</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
+<a name="line-415"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>TryPut</span> <span class='hs-varid'>c</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedWrite</span> <span class='hs-varid'>c</span>
+<a name="line-416"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>Read</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>        <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedRead</span> <span class='hs-varid'>c</span>
+<a name="line-417"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>BlockedRead</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
+<a name="line-418"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>Take</span> <span class='hs-varid'>c</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedRead</span> <span class='hs-varid'>c</span>
+<a name="line-419"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>BlockedTake</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
+<a name="line-420"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>TryTake</span> <span class='hs-varid'>c</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedRead</span> <span class='hs-varid'>c</span>
+<a name="line-421"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>ReadRef</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>     <span class='hs-keyglyph'>=</span> <span class='hs-conid'>UnsynchronisedRead</span> <span class='hs-varid'>r</span>
+<a name="line-422"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>ModRef</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedModify</span> <span class='hs-varid'>r</span>
+<a name="line-423"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>WriteRef</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>    <span class='hs-keyglyph'>=</span> <span class='hs-conid'>UnsynchronisedWrite</span> <span class='hs-varid'>r</span>
+<a name="line-424"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>CommitRef</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedCommit</span> <span class='hs-varid'>r</span>
+<a name="line-425"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>STM</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>            <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
+<a name="line-426"></a><span class='hs-definition'>simplify</span> <span class='hs-conid'>BlockedSTM</span>         <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
+<a name="line-427"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>ThrowTo</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>        <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
+<a name="line-428"></a><span class='hs-definition'>simplify</span> <span class='hs-layout'>(</span><span class='hs-conid'>BlockedThrowTo</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
+<a name="line-429"></a><span class='hs-definition'>simplify</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>UnsynchronisedOther</span>
+<a name="line-430"></a>
+<a name="line-431"></a><a name="simplify'"></a><span class='hs-comment'>-- | Variant of 'simplify' that takes a 'Lookahead'.</span>
+<a name="line-432"></a><span class='hs-definition'>simplify'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Lookahead</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>ActionType</span>
+<a name="line-433"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillPut</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>         <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedWrite</span> <span class='hs-varid'>c</span>
+<a name="line-434"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillTryPut</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedWrite</span> <span class='hs-varid'>c</span>
+<a name="line-435"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillRead</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>        <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedRead</span> <span class='hs-varid'>c</span>
+<a name="line-436"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillTake</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>        <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedRead</span> <span class='hs-varid'>c</span>
+<a name="line-437"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillTryTake</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span>     <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedRead</span> <span class='hs-varid'>c</span>
+<a name="line-438"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillReadRef</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>     <span class='hs-keyglyph'>=</span> <span class='hs-conid'>UnsynchronisedRead</span> <span class='hs-varid'>r</span>
+<a name="line-439"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillModRef</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedModify</span> <span class='hs-varid'>r</span>
+<a name="line-440"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillWriteRef</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>    <span class='hs-keyglyph'>=</span> <span class='hs-conid'>UnsynchronisedWrite</span> <span class='hs-varid'>r</span>
+<a name="line-441"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillCommitRef</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedCommit</span> <span class='hs-varid'>r</span>
+<a name="line-442"></a><span class='hs-definition'>simplify'</span> <span class='hs-conid'>WillSTM</span>         <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
+<a name="line-443"></a><span class='hs-definition'>simplify'</span> <span class='hs-layout'>(</span><span class='hs-conid'>WillThrowTo</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>SynchronisedOther</span>
+<a name="line-444"></a><span class='hs-definition'>simplify'</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>UnsynchronisedOther</span>
+<a name="line-445"></a>
+<a name="line-446"></a><span class='hs-comment'>--------------------------------------------------------------------------------</span>
+<a name="line-447"></a><span class='hs-comment'>-- * Failures</span>
+<a name="line-448"></a>
+<a name="line-449"></a><a name="Failure"></a><span class='hs-comment'>-- | An indication of how a concurrent computation failed.</span>
+<a name="line-450"></a><a name="Failure"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Failure</span> <span class='hs-keyglyph'>=</span>
+<a name="line-451"></a>    <span class='hs-conid'>InternalError</span>
+<a name="line-452"></a>  <span class='hs-comment'>-- ^ Will be raised if the scheduler does something bad. This should</span>
+<a name="line-453"></a>  <span class='hs-comment'>-- never arise unless you write your own, faulty, scheduler! If it</span>
+<a name="line-454"></a>  <span class='hs-comment'>-- does, please file a bug report.</span>
+<a name="line-455"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>Deadlock</span>
+<a name="line-456"></a>  <span class='hs-comment'>-- ^ The computation became blocked indefinitely on @CVar@s.</span>
+<a name="line-457"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>STMDeadlock</span>
+<a name="line-458"></a>  <span class='hs-comment'>-- ^ The computation became blocked indefinitely on @CTVar@s.</span>
+<a name="line-459"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>UncaughtException</span>
+<a name="line-460"></a>  <span class='hs-comment'>-- ^ An uncaught exception bubbled to the top of the computation.</span>
+<a name="line-461"></a>  <span class='hs-keyword'>deriving</span> <span class='hs-layout'>(</span><span class='hs-conid'>Eq</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span><span class='hs-layout'>)</span>
+<a name="line-462"></a>
+<a name="line-463"></a><a name="instance%20NFData%20Failure"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>NFData</span> <span class='hs-conid'>Failure</span> <span class='hs-keyword'>where</span>
+<a name="line-464"></a>  <span class='hs-varid'>rnf</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span> <span class='hs-comment'>-- WHNF == NF</span>
+<a name="line-465"></a>
+<a name="line-466"></a><a name="showFail"></a><span class='hs-comment'>-- | Pretty-print a failure</span>
+<a name="line-467"></a><span class='hs-definition'>showFail</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Failure</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span>
+<a name="line-468"></a><span class='hs-definition'>showFail</span> <span class='hs-conid'>Deadlock</span>          <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[deadlock]"</span>
+<a name="line-469"></a><span class='hs-definition'>showFail</span> <span class='hs-conid'>STMDeadlock</span>       <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[stm-deadlock]"</span>
+<a name="line-470"></a><span class='hs-definition'>showFail</span> <span class='hs-conid'>InternalError</span>     <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[internal-error]"</span>
+<a name="line-471"></a><span class='hs-definition'>showFail</span> <span class='hs-conid'>UncaughtException</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"[exception]"</span>
+<a name="line-472"></a>
+<a name="line-473"></a><span class='hs-comment'>--------------------------------------------------------------------------------</span>
+<a name="line-474"></a><span class='hs-comment'>-- * Memory Models</span>
+<a name="line-475"></a>
+<a name="line-476"></a><a name="MemType"></a><span class='hs-comment'>-- | The memory model to use for non-synchronised 'CRef' operations.</span>
+<a name="line-477"></a><a name="MemType"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>MemType</span> <span class='hs-keyglyph'>=</span>
+<a name="line-478"></a>    <span class='hs-conid'>SequentialConsistency</span>
+<a name="line-479"></a>  <span class='hs-comment'>-- ^ The most intuitive model: a program behaves as a simple</span>
+<a name="line-480"></a>  <span class='hs-comment'>-- interleaving of the actions in different threads. When a 'CRef'</span>
+<a name="line-481"></a>  <span class='hs-comment'>-- is written to, that write is immediately visible to all threads.</span>
+<a name="line-482"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>TotalStoreOrder</span>
+<a name="line-483"></a>  <span class='hs-comment'>-- ^ Each thread has a write buffer. A thread sees its writes</span>
 <a name="line-484"></a>  <span class='hs-comment'>-- immediately, but other threads will only see writes when they are</span>
-<a name="line-485"></a>  <span class='hs-comment'>-- committed, which may happen later. Writes to different 'CRef's</span>
-<a name="line-486"></a>  <span class='hs-comment'>-- are not necessarily committed in the same order that they are</span>
-<a name="line-487"></a>  <span class='hs-comment'>-- created.</span>
-<a name="line-488"></a>  <span class='hs-keyword'>deriving</span> <span class='hs-layout'>(</span><span class='hs-conid'>Eq</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span><span class='hs-layout'>,</span> <span class='hs-conid'>Read</span><span class='hs-layout'>)</span>
-<a name="line-489"></a>
-<a name="line-490"></a><a name="instance%20NFData%20MemType"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>NFData</span> <span class='hs-conid'>MemType</span> <span class='hs-keyword'>where</span>
-<a name="line-491"></a>  <span class='hs-varid'>rnf</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>m</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span> <span class='hs-comment'>-- WHNF == NF</span>
+<a name="line-485"></a>  <span class='hs-comment'>-- committed, which may happen later. Writes are committed in the</span>
+<a name="line-486"></a>  <span class='hs-comment'>-- same order that they are created.</span>
+<a name="line-487"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-conid'>PartialStoreOrder</span>
+<a name="line-488"></a>  <span class='hs-comment'>-- ^ Each 'CRef' has a write buffer. A thread sees its writes</span>
+<a name="line-489"></a>  <span class='hs-comment'>-- immediately, but other threads will only see writes when they are</span>
+<a name="line-490"></a>  <span class='hs-comment'>-- committed, which may happen later. Writes to different 'CRef's</span>
+<a name="line-491"></a>  <span class='hs-comment'>-- are not necessarily committed in the same order that they are</span>
+<a name="line-492"></a>  <span class='hs-comment'>-- created.</span>
+<a name="line-493"></a>  <span class='hs-keyword'>deriving</span> <span class='hs-layout'>(</span><span class='hs-conid'>Eq</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span><span class='hs-layout'>,</span> <span class='hs-conid'>Read</span><span class='hs-layout'>)</span>
+<a name="line-494"></a>
+<a name="line-495"></a><a name="instance%20NFData%20MemType"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>NFData</span> <span class='hs-conid'>MemType</span> <span class='hs-keyword'>where</span>
+<a name="line-496"></a>  <span class='hs-varid'>rnf</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>m</span> <span class='hs-varop'>`seq`</span> <span class='hs-conid'>()</span> <span class='hs-comment'>-- WHNF == NF</span>
 </pre></body>
 </html>
