@@ -98,8 +98,10 @@ data Action n r s =
   | AForgets    (Either CVarId CTVarId) (Action n r s)
   | AAllKnown   (Action n r s)
 
-  | forall a. AAtom (s a) (a -> Action n r s)
   | ALift (n (Action n r s))
+  | APrim (n (Action n r s))
+
+  | forall a. AAtom (s a) (a -> Action n r s)
   | AYield  (Action n r s)
   | AReturn (Action n r s)
   | ACommit ThreadId CRefId

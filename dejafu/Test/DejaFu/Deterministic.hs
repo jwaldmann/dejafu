@@ -54,6 +54,7 @@ import Test.DejaFu.STM.Internal (CTVar(..))
 import qualified Control.Monad.Catch as Ca
 import qualified Control.Monad.Conc.Class as C
 import qualified Control.Monad.IO.Class as IO
+import qualified Control.Monad.Primitive as Pr
 
 #if __GLASGOW_HASKELL__ < 710
 import Control.Applicative (Applicative(..), (<$>))
@@ -80,6 +81,11 @@ wrap f = C . f . unC
 instance IO.MonadIO ConcIO where
   liftIO ma = toConc (\c -> ALift (fmap c ma))
 
+instance Pr.PrimMonad n => Pr.PrimMonad (Conc n r s) where
+  type PrimState (Conc n r s) = Pr.PrimState n
+
+  primitive pa = toConc (\c -> APrim (fmap c (Pr.primitive pa)))
+
 instance Ca.MonadCatch (Conc n r s) where
   catch ma h = toConc (ACatching (unC . h) (unC ma))
 
@@ -90,7 +96,7 @@ instance Ca.MonadMask (Conc n r s) where
   mask                mb = toConc (AMasking MaskedInterruptible   (\f -> unC $ mb $ wrap f))
   uninterruptibleMask mb = toConc (AMasking MaskedUninterruptible (\f -> unC $ mb $ wrap f))
 
-instance Monad n => C.MonadConc (Conc n r (STMLike n r)) where
+instance Pr.PrimMonad n => C.MonadConc (Conc n r (STMLike n r)) where
   type CVar     (Conc n r (STMLike n r)) = CVar r
   type CRef     (Conc n r (STMLike n r)) = CRef r
   type STMLike  (Conc n r (STMLike n r)) = STMLike n r

@@ -27,6 +27,7 @@ import Control.Concurrent.MVar (MVar, readMVar, newEmptyMVar, putMVar, tryPutMVa
 import Control.Exception (Exception, AsyncException(ThreadKilled), SomeException)
 import Control.Monad (liftM)
 import Control.Monad.Catch (MonadCatch, MonadThrow, MonadMask)
+import Control.Monad.Primitive (PrimMonad)
 import Control.Monad.Reader (ReaderT(..), runReaderT)
 import Control.Monad.STM (STM)
 import Control.Monad.STM.Class (MonadSTM, CTVar)
@@ -68,6 +69,7 @@ import Data.Monoid (Monoid, mempty)
 -- Every @MonadConc@ has an associated 'MonadSTM', transactions of
 -- which can be run atomically.
 class ( Applicative m, Monad m
+      , PrimMonad m
       , MonadCatch m, MonadThrow m, MonadMask m
       , MonadSTM (STMLike m)
       , Eq (ThreadId m), Show (ThreadId m)) => MonadConc m  where

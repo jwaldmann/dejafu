@@ -107,8 +107,10 @@ library
                      , containers
                      , deepseq
                      , exceptions >=0.7
+                     , ghc-prim
                      , monad-loops
                      , mtl
+                     , primitive
                      , random
                      , stm
                      , transformers
