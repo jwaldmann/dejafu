@@ -188,6 +188,7 @@ lookahead = unsafeToNonEmpty . lookahead' where
   lookahead' (AMasking ms _ _)       = [WillSetMasking False ms]
   lookahead' (AResetMask b1 b2 ms k) = (if b1 then WillSetMasking else WillResetMasking) b2 ms : lookahead' k
   lookahead' (ALift _)               = [WillLift]
+  lookahead' (APrim _)               = [WillPrim]
   lookahead' (AKnowsAbout _ k)       = WillKnowsAbout : lookahead' k
   lookahead' (AForgets _ k)          = WillForgets : lookahead' k
   lookahead' (AAllKnown k)           = WillAllKnown : lookahead' k
@@ -233,6 +234,7 @@ stepThread fixed runstm memtype action idSource tid threads wb = case action of
   ACommit  t c     -> stepCommit      t c
   AAtom    stm c   -> stepAtom        stm c
   ALift    na      -> stepLift        na
+  APrim    na      -> stepPrim        na
   AThrow   e       -> stepThrow       e
   AThrowTo t e c   -> stepThrowTo     t e c
   ACatching h ma c -> stepCatching    h ma c
@@ -420,6 +422,11 @@ stepThread fixed runstm memtype action idSource tid threads wb = case action of
     stepLift na = do
       a <- na
       simple (goto a tid threads) Lift
+
+    -- | Perform a primitive action
+    stepPrim na = do
+      a <- na
+      simple (goto a tid threads) Prim
 
     -- | Execute a 'return' or 'pure'.
     stepReturn c = simple (goto c tid threads) Return

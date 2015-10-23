@@ -280,6 +280,8 @@ data ThreadAction =
   -- ^ Lift an action from the underlying monad. Note that the
   -- penultimate action in a trace will always be a @Lift@, this is an
   -- artefact of how the runner works.
+  | Prim
+  -- ^ Perform a primitive state-transformer action.
   | Return
   -- ^ A 'return' or 'pure' action was executed.
   | KnowsAbout
@@ -368,6 +370,8 @@ data Lookahead =
   -- ^ Will lift an action from the underlying monad. Note that the
   -- penultimate action in a trace will always be a @Lift@, this is an
   -- artefact of how the runner works.
+  | WillPrim
+  -- ^ Will perform a primitive state-transformer action.
   | WillReturn
   -- ^ Will execute a 'return' or 'pure' action.
   | WillKnowsAbout
