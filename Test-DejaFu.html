@@ -53,8 +53,8 @@ False</pre><p>It identifies the deadlock, and also the possible results the
  as a simple interleaving of the individual thread
  actions. Processors do all sorts of complex things to increase
  speed, such as buffering writes. For concurrent programs which
- make use of non-synchronised functions (<code><a href="Test-DejaFu-Deterministic.html#v:readCRef">readCRef</a></code> coupled with
- <code><a href="Test-DejaFu-Deterministic.html#v:writeCRef">writeCRef</a></code>) different memory models may yield different results.</p><p>As an example, consider this program (modified from the
+ make use of non-synchronised functions (<code>readCRef</code> coupled with
+ <code>writeCRef</code>) different memory models may yield different results.</p><p>As an example, consider this program (modified from the
  Data.IORef documentation). Two <code>CRef</code>s are created, and two
  threads spawned to write to and read from both. Each thread
  returns the value it observes.</p><pre>example2 :: MonadConc m =&gt; m (Bool, Bool)
@@ -92,8 +92,8 @@ False</pre><pre>&gt; autocheck' TotalStoreOrder example2
 False</pre><p>Traces for non-sequentially-consistent memory models show where
  writes to <code>CRef</code>s are <em>committed</em>, which makes a write visible to
  all threads rather than just the one which performed the
- write. Only <code><a href="Test-DejaFu-Deterministic.html#v:writeCRef">writeCRef</a></code> is broken up into separate write and
- commit steps, <code><a href="Test-DejaFu-Deterministic.html#v:modifyCRef">modifyCRef</a></code> is still atomic and imposes a memory
+ write. Only <code>writeCRef</code> is broken up into separate write and
+ commit steps, <code>modifyCRef</code> is still atomic and imposes a memory
  barrier.</p></div><div class="top"><p class="src"><span class="keyword">data</span> <a name="t:MemType" class="def">MemType</a> <a href="src/Test-DejaFu-Deterministic-Internal-Common.html#MemType" class="link">Source</a></p><div class="doc"><p>The memory model to use for non-synchronised <code>CRef</code> operations.</p></div><div class="subs constructors"><p class="caption">Constructors</p><table><tr><td class="src"><a name="v:SequentialConsistency" class="def">SequentialConsistency</a></td><td class="doc"><p>The most intuitive model: a program behaves as a simple
  interleaving of the actions in different threads. When a <code>CRef</code>
  is written to, that write is immediately visible to all threads.</p></td></tr><tr><td class="src"><a name="v:TotalStoreOrder" class="def">TotalStoreOrder</a></td><td class="doc"><p>Each thread has a write buffer. A thread sees its writes
