@@ -5,6 +5,12 @@ packages:
 - hunit-dejafu
 - tasty-dejafu
 - dejafu
+- location:
+    git: https://github.com/barrucadu/haskell-lockfree.git
+    commit: 10cbb5427af6083fde8615c6af1d60db9ccacc11
+  subdirs:
+  - atomic-primops
+  extra-dep: true
 
 extra-deps: []
 
