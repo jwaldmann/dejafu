@@ -43,7 +43,9 @@ module Test.DejaFu.Deterministic
 
 import Control.Exception (MaskingState(..))
 import Control.Monad.ST (ST, runST)
+import Data.Bits
 import Data.IORef (IORef)
+import Data.Primitive.ByteArray (MutableByteArray)
 import Data.STRef (STRef)
 import Test.DejaFu.Deterministic.Internal
 import Test.DejaFu.Deterministic.Schedule
@@ -55,6 +57,7 @@ import qualified Control.Monad.Catch as Ca
 import qualified Control.Monad.Conc.Class as C
 import qualified Control.Monad.IO.Class as IO
 import qualified Control.Monad.Primitive as Pr
+import qualified Data.Atomics.Class as A
 
 #if __GLASGOW_HASKELL__ < 710
 import Control.Applicative (Applicative(..), (<$>))
@@ -86,6 +89,50 @@ instance Pr.PrimMonad n => Pr.PrimMonad (Conc n r s) where
 
   primitive pa = toConc (\c -> APrim (fmap c (Pr.primitive pa)))
 
+instance A.MonadAtomic n => A.MonadAtomic (Conc n r s) where
+  type Ref (Conc n r s) = A.Ref n
+
+  readForCAS r = toConc undefined
+
+  casRef  r t a   = toConc undefined
+  casRef2 r t1 t2 = toConc undefined
+
+  atomicModifyRefCAS r f = toConc undefined
+
+  readMutVarForCAS v = toConc undefined
+
+  casMutVar  m t  a  = toConc undefined
+  casMutVar2 m t1 t2 = toConc undefined
+
+  casArrayElem  arr i t  a  = toConc undefined
+  casArrayElem2 arr i t1 t2 = toConc undefined
+
+  readArrayElem arr i = toConc undefined
+
+  casByteArrayInt arr off old new = toConc undefined
+
+  fetchAddIntArray     = fetchModByteArray (+)
+  fetchSubIntArray     = fetchModByteArray (-)
+  fetchAndIntArray     = fetchModByteArray (.&.)
+  fetchNandIntArray    = fetchModByteArray $ \x y -> complement (x .&. y)
+  fetchOrIntArray      = fetchModByteArray (.|.)
+  fetchXorIntArray     = fetchModByteArray xor
+  fetchAddByteArrayInt = fetchModByteArray' (+)
+
+  storeLoadBarrier = toConc undefined
+  loadLoadBarrier  = toConc undefined
+  writeBarrier     = toConc undefined
+
+-- | Modify a word in a 'MutableByteArray' and return the old value,
+-- this imposes no memory barrier.
+fetchModByteArray :: (Int -> Int -> Int) -> MutableByteArray (Pr.PrimState (Conc n r s)) -> Int -> Int -> Conc n r s Int
+fetchModByteArray op arr off i = toConc undefined
+
+-- | Modify a word in a 'MutableByteArray' and return the new value,
+-- this imposes no memory barrier.
+fetchModByteArray' :: (Int -> Int -> Int) -> MutableByteArray (Pr.PrimState (Conc n r s)) -> Int -> Int -> Conc n r s Int
+fetchModByteArray' op arr off i = toConc undefined
+
 instance Ca.MonadCatch (Conc n r s) where
   catch ma h = toConc (ACatching (unC . h) (unC ma))
 
@@ -96,7 +143,7 @@ instance Ca.MonadMask (Conc n r s) where
   mask                mb = toConc (AMasking MaskedInterruptible   (\f -> unC $ mb $ wrap f))
   uninterruptibleMask mb = toConc (AMasking MaskedUninterruptible (\f -> unC $ mb $ wrap f))
 
-instance Pr.PrimMonad n => C.MonadConc (Conc n r (STMLike n r)) where
+instance (A.MonadAtomic n, A.Ref (Conc n r (STMLike n r)) ~ CRef r) => C.MonadConc (Conc n r (STMLike n r)) where
   type CVar     (Conc n r (STMLike n r)) = CVar r
   type CRef     (Conc n r (STMLike n r)) = CRef r
   type STMLike  (Conc n r (STMLike n r)) = STMLike n r
