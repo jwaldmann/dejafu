@@ -101,10 +101,14 @@ data Action n r s =
   | ALift (n (Action n r s))
   | APrim (n (Action n r s))
 
+  | AStoreLoadBarrier (Action n r s)
+  | ALoadLoadBarrier (Action n r s)
+  | AWriteBarrier (Action n r s)
+  | ACommit ThreadId CRefId
+
   | forall a. AAtom (s a) (a -> Action n r s)
   | AYield  (Action n r s)
   | AReturn (Action n r s)
-  | ACommit ThreadId CRefId
   | AStop
 
 --------------------------------------------------------------------------------
@@ -276,6 +280,15 @@ data ThreadAction =
   -- ^ Return to an earlier masking state.  If 'True', this is being
   -- used to return to the state of the masked block in the argument
   -- passed to a 'mask'ed function.
+  | StoreLoadBarrier
+  -- ^ Executed a store/load barrier. This commits all pending stores
+  -- under TSO and PSO, and is a no-op under SQ.
+  | LoadLoadBarrier
+  -- ^ Executed a load/load barrier. This is a no-op under all
+  -- supported memory models.
+  | WriteBarrier
+  -- ^ Executed a full write barrier. This commits all pending stored
+  -- under TSO and PSO, and is a no-op under SQ.
   | Lift
   -- ^ Lift an action from the underlying monad. Note that the
   -- penultimate action in a trace will always be a @Lift@, this is an
@@ -366,6 +379,12 @@ data Lookahead =
   -- ^ Will return to an earlier masking state.  If 'True', this is
   -- being used to return to the state of the masked block in the
   -- argument passed to a 'mask'ed function.
+  | WillStoreLoadBarrier
+  -- ^ Will execute a store/load barrier
+  | WillLoadLoadBarrier
+  -- ^ Will execute a load/load barrier.
+  | WillWriteBarrier
+  -- ^ Will execute a full write barrier.
   | WillLift
   -- ^ Will lift an action from the underlying monad. Note that the
   -- penultimate action in a trace will always be a @Lift@, this is an
@@ -475,6 +494,8 @@ simplify (ReadRef r)     = UnsynchronisedRead r
 simplify (ModRef r)      = SynchronisedModify r
 simplify (WriteRef r)    = UnsynchronisedWrite r
 simplify (CommitRef _ r) = SynchronisedCommit r
+simplify StoreLoadBarrier = SynchronisedOther
+simplify WriteBarrier     = SynchronisedOther
 simplify (STM _)            = SynchronisedOther
 simplify BlockedSTM         = SynchronisedOther
 simplify (ThrowTo _)        = SynchronisedOther
@@ -483,6 +504,8 @@ simplify _ = UnsynchronisedOther
 
 -- | Variant of 'simplify' that takes a 'Lookahead'.
 simplify' :: Lookahead -> ActionType
+simplify' WillStoreLoadBarrier = SynchronisedOther
+simplify' WillWriteBarrier     = SynchronisedOther
 simplify' (WillPutVar c)     = SynchronisedWrite c
 simplify' (WillTryPutVar c)  = SynchronisedWrite c
 simplify' (WillReadVar c)    = SynchronisedRead c

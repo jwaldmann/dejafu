@@ -192,6 +192,9 @@ lookahead = unsafeToNonEmpty . lookahead' where
   lookahead' (AKnowsAbout _ k)       = WillKnowsAbout : lookahead' k
   lookahead' (AForgets _ k)          = WillForgets : lookahead' k
   lookahead' (AAllKnown k)           = WillAllKnown : lookahead' k
+  lookahead' (AStoreLoadBarrier k)   = WillStoreLoadBarrier : lookahead' k
+  lookahead' (ALoadLoadBarrier k)    = WillLoadLoadBarrier : lookahead' k
+  lookahead' (AWriteBarrier k)       = WillWriteBarrier : lookahead' k
   lookahead' (AYield k)              = WillYield : lookahead' k
   lookahead' (AReturn k)             = WillReturn : lookahead' k
   lookahead' AStop                   = [WillStop]
@@ -242,6 +245,9 @@ stepThread fixed runstm memtype action idSource tid threads wb = case action of
   AMasking m ma c  -> stepMasking     m ma c
   AResetMask b1 b2 m c -> stepResetMask b1 b2 m c
   AReturn     c    -> stepReturn c
+  AStoreLoadBarrier c -> stepStoreLoadBarrier c
+  ALoadLoadBarrier c -> stepLoadLoadBarrier c
+  AWriteBarrier c -> stepWriteBarrier c
   AKnowsAbout v c  -> stepKnowsAbout  v c
   AForgets    v c  -> stepForgets v c
   AAllKnown   c    -> stepAllKnown c
@@ -430,6 +436,15 @@ stepThread fixed runstm memtype action idSource tid threads wb = case action of
 
     -- | Execute a 'return' or 'pure'.
     stepReturn c = simple (goto c tid threads) Return
+
+    -- | Execute a store/load barrier.
+    stepStoreLoadBarrier c = synchronised $ simple (goto c tid threads) StoreLoadBarrier
+
+    -- | Execute a load/load barrier.
+    stepLoadLoadBarrier c = simple (goto c tid threads) LoadLoadBarrier
+
+    -- | Execute a write barrier.
+    stepWriteBarrier c = synchronised $ simple (goto c tid threads) WriteBarrier
 
     -- | Record that a variable is known about.
     stepKnowsAbout v c = simple (knows [v] tid $ goto c tid threads) KnowsAbout

@@ -119,9 +119,9 @@ instance A.MonadAtomic n => A.MonadAtomic (Conc n r s) where
   fetchXorIntArray     = fetchModByteArray xor
   fetchAddByteArrayInt = fetchModByteArray' (+)
 
-  storeLoadBarrier = toConc undefined
-  loadLoadBarrier  = toConc undefined
-  writeBarrier     = toConc undefined
+  storeLoadBarrier = toConc $ \c -> AStoreLoadBarrier $ c ()
+  loadLoadBarrier  = toConc $ \c -> ALoadLoadBarrier  $ c ()
+  writeBarrier     = toConc $ \c -> AWriteBarrier     $ c ()
 
 -- | Modify a word in a 'MutableByteArray' and return the old value,
 -- this imposes no memory barrier.
