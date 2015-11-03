@@ -22,7 +22,7 @@
 <a name="line-13"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>testDejafuIO</span>
 <a name="line-14"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>testDejafusIO</span>
 <a name="line-15"></a>
-<a name="line-16"></a>  <span class='hs-comment'>-- * Testing under Relaxed Memory</span>
+<a name="line-16"></a>  <span class='hs-comment'>-- * Testing under Alternative Memory Models</span>
 <a name="line-17"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>MemType</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
 <a name="line-18"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>testAuto'</span>
 <a name="line-19"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>testAutoIO'</span>
@@ -53,7 +53,7 @@
 <a name="line-44"></a>  <span class='hs-keyglyph'>=&gt;</span> <span class='hs-layout'>(</span><span class='hs-keyword'>forall</span> <span class='hs-varid'>t</span><span class='hs-varop'>.</span> <span class='hs-conid'>Conc</span> <span class='hs-varid'>t</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
 <a name="line-45"></a>  <span class='hs-comment'>-- ^ The computation to test</span>
 <a name="line-46"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>TestTree</span>
-<a name="line-47"></a><span class='hs-definition'>testAuto</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>testAuto'</span> <span class='hs-conid'>SequentialConsistency</span>
+<a name="line-47"></a><span class='hs-definition'>testAuto</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>testAuto'</span> <span class='hs-conid'>TotalStoreOrder</span>
 <a name="line-48"></a>
 <a name="line-49"></a><a name="testAuto'"></a><span class='hs-comment'>-- | Variant of 'testAuto' which tests a computation under a given</span>
 <a name="line-50"></a><span class='hs-comment'>-- memory model.</span>
@@ -67,7 +67,7 @@
 <a name="line-58"></a>
 <a name="line-59"></a><a name="testAutoIO"></a><span class='hs-comment'>-- | Variant of 'testAuto' for computations which do 'IO'.</span>
 <a name="line-60"></a><span class='hs-definition'>testAutoIO</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>Eq</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-layout'>(</span><span class='hs-keyword'>forall</span> <span class='hs-varid'>t</span><span class='hs-varop'>.</span> <span class='hs-conid'>ConcIO</span> <span class='hs-varid'>t</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>TestTree</span>
-<a name="line-61"></a><span class='hs-definition'>testAutoIO</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>testAutoIO'</span> <span class='hs-conid'>SequentialConsistency</span>
+<a name="line-61"></a><span class='hs-definition'>testAutoIO</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>testAutoIO'</span> <span class='hs-conid'>TotalStoreOrder</span>
 <a name="line-62"></a>
 <a name="line-63"></a><a name="testAutoIO'"></a><span class='hs-comment'>-- | Variant of 'testAuto'' for computations which do 'IO'.</span>
 <a name="line-64"></a><span class='hs-definition'>testAutoIO'</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>Eq</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>MemType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-keyword'>forall</span> <span class='hs-varid'>t</span><span class='hs-varop'>.</span> <span class='hs-conid'>ConcIO</span> <span class='hs-varid'>t</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>TestTree</span>
@@ -93,7 +93,7 @@
 <a name="line-84"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Predicate</span> <span class='hs-varid'>a</span>
 <a name="line-85"></a>  <span class='hs-comment'>-- ^ The predicate to check</span>
 <a name="line-86"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>TestTree</span>
-<a name="line-87"></a><span class='hs-definition'>testDejafu</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>testDejafu'</span> <span class='hs-conid'>SequentialConsistency</span> <span class='hs-num'>2</span> <span class='hs-num'>5</span>
+<a name="line-87"></a><span class='hs-definition'>testDejafu</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>testDejafu'</span> <span class='hs-conid'>TotalStoreOrder</span> <span class='hs-num'>2</span> <span class='hs-num'>5</span>
 <a name="line-88"></a>
 <a name="line-89"></a><a name="testDejafu'"></a><span class='hs-comment'>-- | Variant of 'testDejafu' which takes a memory model and</span>
 <a name="line-90"></a><span class='hs-comment'>-- pre-emption bound.</span>
@@ -124,7 +124,7 @@
 <a name="line-115"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>TestName</span><span class='hs-layout'>,</span> <span class='hs-conid'>Predicate</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span>
 <a name="line-116"></a>  <span class='hs-comment'>-- ^ The list of predicates (with names) to check</span>
 <a name="line-117"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>TestTree</span>
-<a name="line-118"></a><span class='hs-definition'>testDejafus</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>testDejafus'</span> <span class='hs-conid'>SequentialConsistency</span> <span class='hs-num'>2</span> <span class='hs-num'>5</span>
+<a name="line-118"></a><span class='hs-definition'>testDejafus</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>testDejafus'</span> <span class='hs-conid'>TotalStoreOrder</span> <span class='hs-num'>2</span> <span class='hs-num'>5</span>
 <a name="line-119"></a>
 <a name="line-120"></a><a name="testDejafus'"></a><span class='hs-comment'>-- | Variant of 'testDejafus' which takes a memory model and pre-emption</span>
 <a name="line-121"></a><span class='hs-comment'>-- bound.</span>
@@ -146,7 +146,7 @@
 <a name="line-137"></a>
 <a name="line-138"></a><a name="testDejafuIO"></a><span class='hs-comment'>-- | Variant of 'testDejafu' for computations which do 'IO'.</span>
 <a name="line-139"></a><span class='hs-definition'>testDejafuIO</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Show</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-layout'>(</span><span class='hs-keyword'>forall</span> <span class='hs-varid'>t</span><span class='hs-varop'>.</span> <span class='hs-conid'>ConcIO</span> <span class='hs-varid'>t</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>TestName</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Predicate</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>TestTree</span>
-<a name="line-140"></a><span class='hs-definition'>testDejafuIO</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>testDejafuIO'</span> <span class='hs-conid'>SequentialConsistency</span> <span class='hs-num'>2</span> <span class='hs-num'>5</span>
+<a name="line-140"></a><span class='hs-definition'>testDejafuIO</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>testDejafuIO'</span> <span class='hs-conid'>TotalStoreOrder</span> <span class='hs-num'>2</span> <span class='hs-num'>5</span>
 <a name="line-141"></a>
 <a name="line-142"></a><a name="testDejafuIO'"></a><span class='hs-comment'>-- | Variant of 'testDejafu'' for computations which do 'IO'.</span>
 <a name="line-143"></a><span class='hs-definition'>testDejafuIO'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Show</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>MemType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-keyword'>forall</span> <span class='hs-varid'>t</span><span class='hs-varop'>.</span> <span class='hs-conid'>ConcIO</span> <span class='hs-varid'>t</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>TestName</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Predicate</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>TestTree</span>
@@ -154,7 +154,7 @@
 <a name="line-145"></a>
 <a name="line-146"></a><a name="testDejafusIO"></a><span class='hs-comment'>-- | Variant of 'testDejafus' for computations which do 'IO'.</span>
 <a name="line-147"></a><span class='hs-definition'>testDejafusIO</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Show</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-layout'>(</span><span class='hs-keyword'>forall</span> <span class='hs-varid'>t</span><span class='hs-varop'>.</span> <span class='hs-conid'>ConcIO</span> <span class='hs-varid'>t</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>TestName</span><span class='hs-layout'>,</span> <span class='hs-conid'>Predicate</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>TestTree</span>
-<a name="line-148"></a><span class='hs-definition'>testDejafusIO</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>testDejafusIO'</span> <span class='hs-conid'>SequentialConsistency</span> <span class='hs-num'>2</span> <span class='hs-num'>5</span>
+<a name="line-148"></a><span class='hs-definition'>testDejafusIO</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>testDejafusIO'</span> <span class='hs-conid'>TotalStoreOrder</span> <span class='hs-num'>2</span> <span class='hs-num'>5</span>
 <a name="line-149"></a>
 <a name="line-150"></a><a name="testDejafusIO'"></a><span class='hs-comment'>-- | Variant of 'dejafus'' for computations which do 'IO'.</span>
 <a name="line-151"></a><span class='hs-definition'>testDejafusIO'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Show</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>MemType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-keyword'>forall</span> <span class='hs-varid'>t</span><span class='hs-varop'>.</span> <span class='hs-conid'>ConcIO</span> <span class='hs-varid'>t</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>TestName</span><span class='hs-layout'>,</span> <span class='hs-conid'>Predicate</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>TestTree</span>
