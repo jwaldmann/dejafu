@@ -310,6 +310,37 @@ data ThreadAction =
   -- ^ Return to an earlier masking state.  If 'True', this is being
   -- used to return to the state of the masked block in the argument
   -- passed to a 'mask'ed function.
+  | ReadForCAS CRefId
+  -- ^ Acquire a @Ticket@ from a 'CRef'.
+  | CasRef CRefId Bool
+  -- ^ Perform a compare-and-swap on a 'CRef'.
+  | CasRef2 CRefId Bool
+  -- ^ Perform a compare-and-swap on a 'CRef' using two tickets.
+  | AtomicModifyRefCAS CRefId
+  -- ^ Atomically modiy a 'CRef' using a compare-and-swap.
+  | ReadMutVarForCAS
+  -- ^ Acquire a @Ticket@ from a 'MutVar#'
+  | CasMutVar Bool
+  -- ^ Perform a compare-and-swap on a 'MutVar#'
+  | CasMutVar2 Bool
+  -- ^ Perform a compare-and-swap on a 'MutVar#' using two tickets.
+  | ReadArrayElem
+  -- ^ Acquire a @Ticket@ from a 'MutableArray'.
+  | CasArrayElem Bool
+  -- ^ Perform a compare-and-swap on a 'MutableArray'.
+  | CasArrayElem2 Bool
+  -- ^ Perform a compare-and-swap on a 'MutableArray' using two
+  -- tickets.
+  | CasByteArrayInt
+  -- ^ Perform a compare-and-swap on word-sized chunks of a
+  -- 'MutableByteArray', returning the old value. and enforce a full
+  -- memory barrier.
+  | FetchModByteArray
+  -- ^ Modify a word in a 'MutableByteArray', returning the old value,
+  -- and enforce a full memory barrier.
+  | FetchModByteArray'
+  -- ^ Modify a word in a 'MutableByteArray', returning the new value,
+  -- and enforce a full memory barrier.
   | StoreLoadBarrier
   -- ^ Executed a store/load barrier. This commits all pending stores
   -- under TSO and PSO, and is a no-op under SQ.
@@ -358,6 +389,14 @@ instance NFData ThreadAction where
   rnf (BlockedThrowTo t) = rnf t
   rnf (SetMasking b m) = b `seq` m `seq` ()
   rnf (ResetMasking b m) = b `seq` m `seq` ()
+  rnf (ReadForCAS c) = rnf c
+  rnf (CasRef c b) = rnf (c, b)
+  rnf (CasRef2 c b) = rnf (c, b)
+  rnf (AtomicModifyRefCAS c) = rnf c
+  rnf (CasMutVar b) = rnf b
+  rnf (CasMutVar2 b) = rnf b
+  rnf (CasArrayElem b) = rnf b
+  rnf (CasArrayElem2 b) = rnf b
   rnf a = a `seq` ()
 
 -- | A one-step look-ahead at what a thread will do next.
@@ -409,6 +448,38 @@ data Lookahead =
   -- ^ Will return to an earlier masking state.  If 'True', this is
   -- being used to return to the state of the masked block in the
   -- argument passed to a 'mask'ed function.
+  | WillReadForCAS CRefId
+  -- ^ Will acquire a @Ticket@ from a 'CRef'.
+  | WillCasRef CRefId
+  -- ^ Will perform a compare-and-swap on a 'CRef'.
+  | WillCasRef2 CRefId
+  -- ^ Will perform a compare-and-swap on a 'CRef' using two tickets.
+  | WillAtomicModifyRefCAS CRefId
+  -- ^ Will atomically modiy a 'CRef' using a compare-and-swap.
+  | WillReadMutVarForCAS
+  -- ^ Will acquire a @Ticket@ from a 'MutVar#'
+  | WillCasMutVar
+  -- ^ Will perform a compare-and-swap on a 'MutVar#'
+  | WillCasMutVar2
+  -- ^ Will perform a compare-and-swap on a 'MutVar#' using two
+  -- tickets.
+  | WillReadArrayElem
+  -- ^ Will acquire a @Ticket@ from a 'MutableArray'.
+  | WillCasArrayElem
+  -- ^ Will perform a compare-and-swap on a 'MutableArray'.
+  | WillCasArrayElem2
+  -- ^ Will perform a compare-and-swap on a 'MutableArray' using two
+  -- tickets.
+  | WillCasByteArrayInt
+  -- ^ Will perform a compare-and-swap on word-sized chunks of a
+  -- 'MutableByteArray', returning the old value. and enforce a full
+  -- memory barrier.
+  | WillFetchModByteArray
+  -- ^ Will modify a word in a 'MutableByteArray', returning the old
+  -- value, and enforce a full memory barrier.
+  | WillFetchModByteArray'
+  -- ^ Will modify a word in a 'MutableByteArray', returning the new
+  -- value, and enforce a full memory barrier.
   | WillStoreLoadBarrier
   -- ^ Will execute a store/load barrier
   | WillLoadLoadBarrier
@@ -446,6 +517,10 @@ instance NFData Lookahead where
   rnf (WillThrowTo t) = rnf t
   rnf (WillSetMasking b m) = b `seq` m `seq` ()
   rnf (WillResetMasking b m) = b `seq` m `seq` ()
+  rnf (WillReadForCAS c) = rnf c
+  rnf (WillCasRef c) = rnf c
+  rnf (WillCasRef2 c) = rnf c
+  rnf (WillAtomicModifyRefCAS c) = rnf c
   rnf l = l `seq` ()
 
 -- | A simplified view of the possible actions a thread can perform.
@@ -512,6 +587,7 @@ cvarOf _ = Nothing
 -- This is used in the SCT code to help determine interesting
 -- alternative scheduling decisions.
 simplify :: ThreadAction -> ActionType
+-- TODO: Add new primops
 simplify (PutVar c _)       = SynchronisedWrite c
 simplify (BlockedPutVar _)  = SynchronisedOther
 simplify (TryPutVar c _ _)  = SynchronisedWrite c
@@ -534,6 +610,7 @@ simplify _ = UnsynchronisedOther
 
 -- | Variant of 'simplify' that takes a 'Lookahead'.
 simplify' :: Lookahead -> ActionType
+-- TODO: Add new primops
 simplify' WillStoreLoadBarrier = SynchronisedOther
 simplify' WillWriteBarrier     = SynchronisedOther
 simplify' (WillPutVar c)     = SynchronisedWrite c

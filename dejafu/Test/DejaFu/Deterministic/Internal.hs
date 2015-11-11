@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP                 #-}
+{-# LANGUAGE MagicHash           #-}
 {-# LANGUAGE RankNTypes          #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -54,15 +55,17 @@ module Test.DejaFu.Deterministic.Internal
  ) where
 
 import Control.Exception (MaskingState(..), SomeException(..))
+import Control.Monad.Primitive (PrimState)
 import Data.List (sort)
 import Data.List.Extra
 import Data.Maybe (fromJust, isJust, fromMaybe, isNothing, listToMaybe)
 import Data.Typeable (cast)
-import Test.DejaFu.STM (CTVarId, Result(..))
-import Test.DejaFu.Internal
+import GHC.Prim (MutVar#)
 import Test.DejaFu.Deterministic.Internal.Common
 import Test.DejaFu.Deterministic.Internal.Memory
 import Test.DejaFu.Deterministic.Internal.Threading
+import Test.DejaFu.Internal
+import Test.DejaFu.STM (CTVarId, Result(..))
 
 import qualified Data.IntMap.Strict as I
 import qualified Data.Map as M
@@ -193,6 +196,19 @@ lookahead = unsafeToNonEmpty . lookahead' where
   lookahead' (AKnowsAbout _ k)       = WillKnowsAbout : lookahead' k
   lookahead' (AForgets _ k)          = WillForgets : lookahead' k
   lookahead' (AAllKnown k)           = WillAllKnown : lookahead' k
+  lookahead' (AReadForCAS (CRef (r, _)) _)  = [WillReadForCAS r]
+  lookahead' (ACasRef (CRef (r, _)) _ _ _)  = [WillCasRef r]
+  lookahead' (ACasRef2 (CRef (r, _)) _ _ _) = [WillCasRef2 r]
+  lookahead' (AAtomicModifyRefCAS (CRef (r, _)) _ _) = [WillAtomicModifyRefCAS r]
+  lookahead' (AReadMutVarForCAS _ _) = [WillReadMutVarForCAS]
+  lookahead' (ACasMutVar _ _ _ _)    = [WillCasMutVar]
+  lookahead' (ACasMutVar2 _ _ _ _)   = [WillCasMutVar2]
+  lookahead' (AReadArrayElem _ _ _)  = [WillReadArrayElem]
+  lookahead' (ACasArrayElem _ _ _ _ _)  = [WillCasArrayElem]
+  lookahead' (ACasArrayElem2 _ _ _ _ _) = [WillCasArrayElem2]
+  lookahead' (ACasByteArrayInt _ _ _ _ _) = [WillCasByteArrayInt]
+  lookahead' (AFetchModByteArray _ _ _ _ _) = [WillFetchModByteArray]
+  lookahead' (AFetchModByteArray' _ _ _ _ _) = [WillFetchModByteArray']
   lookahead' (AStoreLoadBarrier k)   = WillStoreLoadBarrier : lookahead' k
   lookahead' (ALoadLoadBarrier k)    = WillLoadLoadBarrier : lookahead' k
   lookahead' (AWriteBarrier k)       = WillWriteBarrier : lookahead' k
@@ -246,6 +262,19 @@ stepThread fixed runstm memtype action idSource tid threads wb = case action of
   AMasking m ma c  -> stepMasking     m ma c
   AResetMask b1 b2 m c -> stepResetMask b1 b2 m c
   AReturn     c    -> stepReturn c
+  AReadForCAS r c  -> stepReadForCAS r c
+  ACasRef r t a c  -> stepCasRef r t a c
+  ACasRef2 r t1 t2 c -> stepCasRef2 r t1 t2 c
+  AAtomicModifyRefCAS r f c -> stepAtomicModifyRefCas r f c
+  AReadMutVarForCAS m c -> stepReadMutVarForCAS m c
+  ACasMutVar m t a c -> stepCasMutVar m t a c
+  ACasMutVar2 m t1 t2 c -> stepCasMutVar2 m t1 t2 c
+  AReadArrayElem arr off c -> stepReadArrayElem arr off c
+  ACasArrayElem arr off t a c -> stepCasArrayElem arr off t a c
+  ACasArrayElem2 arr off t1 t2 c -> stepCasArrayElem2 arr off t1 t2 c
+  ACasByteArrayInt mba off old new c -> stepCasByteArrayInt mba off old new c
+  AFetchModByteArray op mba off a c -> stepFetchModByteArray op mba off a c
+  AFetchModByteArray' op mba off a c -> stepFetchModByteArray' op mba off a c
   AStoreLoadBarrier c -> stepStoreLoadBarrier c
   ALoadLoadBarrier c -> stepLoadLoadBarrier c
   AWriteBarrier c -> stepWriteBarrier c
@@ -437,6 +466,56 @@ stepThread fixed runstm memtype action idSource tid threads wb = case action of
 
     -- | Execute a 'return' or 'pure'.
     stepReturn c = simple (goto c tid threads) Return
+
+    -- | Acquire a @Ticket@ from a 'CRef'.
+    stepReadForCAS cref@(CRef (crid, _)) c = undefined -- ReadForCAS crid
+
+    -- | Perform a compare-and-swap on a 'CRef'.
+    stepCasRef cref@(CRef (crid, _)) t a c = undefined -- CasRef crid ?
+
+    -- | Perform a compare-and-swap on a 'CRef' using two tickets.
+    stepCasRef2 cref@(CRef (crid, _)) t1 t2 c = undefined -- CasRef2 crid ?
+
+    -- | Atomically modiy a 'CRef' using a compare-and-swap.
+    stepAtomicModifyRefCas cref@(CRef (crid, _)) f c = undefined -- AtomicModifyRefCas crid
+
+    -- | Acquire a @Ticket@ from a 'MutVar#'
+    stepReadMutVarForCAS :: MutVar# (PrimState n) a -> (Ticket a -> Action n r s)
+      -> n (Either Failure (Threads n r s, IdSource, ThreadAction, WriteBuffer r))
+    stepReadMutVarForCAS m c = undefined -- ReadMutVarForCAS
+
+    -- | Perform a compare-and-swap on a 'MutVar#'
+    stepCasMutVar :: MutVar# (PrimState n) a -> Ticket a -> a -> ((Bool, Ticket a) -> Action n r s)
+      -> n (Either Failure (Threads n r s, IdSource, ThreadAction, WriteBuffer r))
+    stepCasMutVar m t a c = undefined -- CasMutVar ?
+
+    -- | Perform a compare-and-swap on a 'MutVar#' using two tickets.
+    stepCasMutVar2 :: MutVar# (PrimState n) a -> Ticket a -> Ticket a -> ((Bool, Ticket a) -> Action n r s)
+      -> n (Either Failure (Threads n r s, IdSource, ThreadAction, WriteBuffer r))
+    stepCasMutVar2 m t1 t2 c = undefined -- CasMutVar2 ?
+
+    -- | Acquire a @Ticket@ from a 'MutableArray'.
+    stepReadArrayElem arr off c = undefined -- ReadArrayElem
+
+    -- | Perform a compare-and-swap on a 'MutableArray'.
+    stepCasArrayElem arr off t a c = undefined -- CasArrayElem ?
+
+    -- | Perform a compare-and-swap on a 'MutableArray' using two
+    -- tickets.
+    stepCasArrayElem2 arr off t1 t2 c = undefined -- CasArrayElem2 ?
+
+    -- | Perform a compare-and-swap on word-sized chunks of a
+    -- 'MutableByteArray', returning the old value. and enforce a full
+    -- memory barrier.
+    stepCasByteArrayInt mba off old new c = undefined -- CasByteIntArray
+
+    -- | Modify a word in a 'MutableByteArray', returning the old
+    -- value, and enforce a full memory barrier.
+    stepFetchModByteArray op mba off a c = undefined -- FetchModByteArray
+
+    -- | Modify a word in a 'MutableByteArray', returning the new
+    -- value, and enforce a full memory barrier.
+    stepFetchModByteArray' op mba off a c = undefined -- FetchModByteArray'
 
     -- | Execute a store/load barrier.
     stepStoreLoadBarrier c = synchronised $ simple (goto c tid threads) StoreLoadBarrier
