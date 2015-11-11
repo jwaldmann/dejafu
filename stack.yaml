@@ -7,7 +7,7 @@ packages:
 - dejafu
 - location:
     git: https://github.com/barrucadu/haskell-lockfree.git
-    commit: 10cbb5427af6083fde8615c6af1d60db9ccacc11
+    commit: 8395da5bd6f09b51ae03fc23d16a5ed112611d82
   subdirs:
   - atomic-primops
   extra-dep: true
