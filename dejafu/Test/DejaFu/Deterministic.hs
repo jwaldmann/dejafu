@@ -90,26 +90,27 @@ instance Pr.PrimMonad n => Pr.PrimMonad (Conc n r s) where
   primitive pa = toConc (\c -> APrim (fmap c (Pr.primitive pa)))
 
 instance A.MonadAtomic n => A.MonadAtomic (Conc n r s) where
-  type Ref (Conc n r s) = A.Ref n
+  type Ref    (Conc n r s) = CRef r
+  type Ticket (Conc n r s) = Ticket
 
-  readForCAS r = toConc undefined
+  readForCAS r = toConc $ AReadForCAS r
 
-  casRef  r t a   = toConc undefined
-  casRef2 r t1 t2 = toConc undefined
+  casRef  r t  a  = toConc $ ACasRef  r t a
+  casRef2 r t1 t2 = toConc $ ACasRef2 r t1 t2
 
-  atomicModifyRefCAS r f = toConc undefined
+  atomicModifyRefCAS r f = toConc $ AAtomicModifyRefCAS r f
 
-  readMutVarForCAS v = toConc undefined
+  readMutVarForCAS v = toConc $ AReadMutVarForCAS v
 
-  casMutVar  m t  a  = toConc undefined
-  casMutVar2 m t1 t2 = toConc undefined
+  casMutVar  m t  a  = toConc $ ACasMutVar  m t a
+  casMutVar2 m t1 t2 = toConc $ ACasMutVar2 m t1 t2
 
-  casArrayElem  arr i t  a  = toConc undefined
-  casArrayElem2 arr i t1 t2 = toConc undefined
+  casArrayElem  arr i t  a  = toConc $ ACasArrayElem  arr i t  a
+  casArrayElem2 arr i t1 t2 = toConc $ ACasArrayElem2 arr i t1 t2
 
-  readArrayElem arr i = toConc undefined
+  readArrayElem arr i = toConc $ AReadArrayElem arr i
 
-  casByteArrayInt arr off old new = toConc undefined
+  casByteArrayInt arr off old new = toConc $ ACasByteArrayInt arr off old new
 
   fetchAddIntArray     = fetchModByteArray (+)
   fetchSubIntArray     = fetchModByteArray (-)
@@ -126,12 +127,12 @@ instance A.MonadAtomic n => A.MonadAtomic (Conc n r s) where
 -- | Modify a word in a 'MutableByteArray' and return the old value,
 -- this imposes no memory barrier.
 fetchModByteArray :: (Int -> Int -> Int) -> MutableByteArray (Pr.PrimState (Conc n r s)) -> Int -> Int -> Conc n r s Int
-fetchModByteArray op arr off i = toConc undefined
+fetchModByteArray op arr off i = toConc $ AFetchModByteArray op arr off i
 
 -- | Modify a word in a 'MutableByteArray' and return the new value,
 -- this imposes no memory barrier.
 fetchModByteArray' :: (Int -> Int -> Int) -> MutableByteArray (Pr.PrimState (Conc n r s)) -> Int -> Int -> Conc n r s Int
-fetchModByteArray' op arr off i = toConc undefined
+fetchModByteArray' op arr off i = toConc $ AFetchModByteArray' op arr off i
 
 instance Ca.MonadCatch (Conc n r s) where
   catch ma h = toConc (ACatching (unC . h) (unC ma))

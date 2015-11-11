@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP                       #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE MagicHash                 #-}
 {-# LANGUAGE RankNTypes                #-}
 
 -- | Common types and utility functions for deterministic execution of
@@ -8,8 +9,12 @@ module Test.DejaFu.Deterministic.Internal.Common where
 
 import Control.DeepSeq (NFData(..))
 import Control.Exception (Exception, MaskingState(..))
+import Control.Monad.Primitive (PrimState)
 import Data.IntMap.Strict (IntMap)
 import Data.List.Extra
+import Data.Primitive.Array (MutableArray)
+import Data.Primitive.ByteArray (MutableByteArray)
+import GHC.Prim (MutVar#)
 import Test.DejaFu.Internal
 import Test.DejaFu.STM (CTVarId)
 
@@ -52,6 +57,12 @@ newtype CVar r a = CVar (CVarId, r (Maybe a))
 -- (so each thread sees its latest write) and the current value
 -- visible to all threads.
 newtype CRef r a = CRef (CRefId, r (IntMap a, a))
+
+-- | When performing compare-and-swaps, the ticket encapsulates proof
+-- that a thread observed a specific previous value of a mutable
+-- variable. It is provided in lieu of the \"old\" value to
+-- compare-and-swap.
+newtype Ticket a = Ticket a
 
 -- | Dict of methods for implementations to override.
 type Fixed n r s = Ref n r (M n r s)
@@ -100,6 +111,25 @@ data Action n r s =
 
   | ALift (n (Action n r s))
   | APrim (n (Action n r s))
+
+  | forall a. AReadForCAS (CRef r a) (Ticket a -> Action n r s)
+  | forall a. ACasRef     (CRef r a) (Ticket a) a ((Bool, Ticket a) -> Action n r s)
+  | forall a. ACasRef2    (CRef r a) (Ticket a) (Ticket a) ((Bool, Ticket a) -> Action n r s)
+
+  | forall a b. AAtomicModifyRefCAS (CRef r a) (a -> (a, b)) (b -> Action n r s)
+
+  | forall a. AReadMutVarForCAS (MutVar# (PrimState n) a) (Ticket a -> Action n r s)
+  | forall a. ACasMutVar        (MutVar# (PrimState n) a) (Ticket a) a ((Bool, Ticket a) -> Action n r s)
+  | forall a. ACasMutVar2       (MutVar# (PrimState n) a) (Ticket a) (Ticket a) ((Bool, Ticket a) -> Action n r s)
+
+  | forall a. AReadArrayElem (MutableArray (PrimState n) a) Int (Ticket a -> Action n r s)
+  | forall a. ACasArrayElem  (MutableArray (PrimState n) a) Int (Ticket a) a ((Bool, Ticket a) -> Action n r s)
+  | forall a. ACasArrayElem2 (MutableArray (PrimState n) a) Int (Ticket a) (Ticket a) ((Bool, Ticket a) -> Action n r s)
+
+  | ACasByteArrayInt (MutableByteArray (PrimState n)) Int Int Int (Int -> Action n r s)
+
+  | AFetchModByteArray  (Int -> Int -> Int) (MutableByteArray (PrimState n)) Int Int (Int -> Action n r s)
+  | AFetchModByteArray' (Int -> Int -> Int) (MutableByteArray (PrimState n)) Int Int (Int -> Action n r s)
 
   | AStoreLoadBarrier (Action n r s)
   | ALoadLoadBarrier (Action n r s)
