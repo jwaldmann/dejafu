@@ -43,9 +43,7 @@ module Test.DejaFu.Deterministic
 
 import Control.Exception (MaskingState(..))
 import Control.Monad.ST (ST, runST)
-import Data.Bits
 import Data.IORef (IORef)
-import Data.Primitive.ByteArray (MutableByteArray)
 import Data.STRef (STRef)
 import Test.DejaFu.Deterministic.Internal
 import Test.DejaFu.Deterministic.Schedule
@@ -112,27 +110,17 @@ instance A.MonadAtomic n => A.MonadAtomic (Conc n r s) where
 
   casByteArrayInt arr off old new = toConc $ ACasByteArrayInt arr off old new
 
-  fetchAddIntArray     = fetchModByteArray (+)
-  fetchSubIntArray     = fetchModByteArray (-)
-  fetchAndIntArray     = fetchModByteArray (.&.)
-  fetchNandIntArray    = fetchModByteArray $ \x y -> complement (x .&. y)
-  fetchOrIntArray      = fetchModByteArray (.|.)
-  fetchXorIntArray     = fetchModByteArray xor
-  fetchAddByteArrayInt = fetchModByteArray' (+)
+  fetchAddIntArray     arr off i = toConc $ AFetchAddIntArray     arr off i
+  fetchSubIntArray     arr off i = toConc $ AFetchSubIntArray     arr off i
+  fetchAndIntArray     arr off i = toConc $ AFetchAndIntArray     arr off i
+  fetchNandIntArray    arr off i = toConc $ AFetchNandIntArray    arr off i
+  fetchOrIntArray      arr off i = toConc $ AFetchOrIntArray      arr off i
+  fetchXorIntArray     arr off i = toConc $ AFetchXorIntArray     arr off i
+  fetchAddByteArrayInt arr off i = toConc $ AFetchAddByteArrayInt arr off i
 
   storeLoadBarrier = toConc $ \c -> AStoreLoadBarrier $ c ()
   loadLoadBarrier  = toConc $ \c -> ALoadLoadBarrier  $ c ()
   writeBarrier     = toConc $ \c -> AWriteBarrier     $ c ()
-
--- | Modify a word in a 'MutableByteArray' and return the old value,
--- this imposes no memory barrier.
-fetchModByteArray :: (Int -> Int -> Int) -> MutableByteArray (Pr.PrimState (Conc n r s)) -> Int -> Int -> Conc n r s Int
-fetchModByteArray op arr off i = toConc $ AFetchModByteArray op arr off i
-
--- | Modify a word in a 'MutableByteArray' and return the new value,
--- this imposes no memory barrier.
-fetchModByteArray' :: (Int -> Int -> Int) -> MutableByteArray (Pr.PrimState (Conc n r s)) -> Int -> Int -> Conc n r s Int
-fetchModByteArray' op arr off i = toConc $ AFetchModByteArray' op arr off i
 
 instance Ca.MonadCatch (Conc n r s) where
   catch ma h = toConc (ACatching (unC . h) (unC ma))

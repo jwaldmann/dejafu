@@ -128,8 +128,13 @@ data Action n r s =
 
   | ACasByteArrayInt (MutableByteArray (PrimState n)) Int Int Int (Int -> Action n r s)
 
-  | AFetchModByteArray  (Int -> Int -> Int) (MutableByteArray (PrimState n)) Int Int (Int -> Action n r s)
-  | AFetchModByteArray' (Int -> Int -> Int) (MutableByteArray (PrimState n)) Int Int (Int -> Action n r s)
+  | AFetchAddIntArray  (MutableByteArray (PrimState n)) Int Int (Int -> Action n r s)
+  | AFetchSubIntArray  (MutableByteArray (PrimState n)) Int Int (Int -> Action n r s)
+  | AFetchAndIntArray  (MutableByteArray (PrimState n)) Int Int (Int -> Action n r s)
+  | AFetchNandIntArray (MutableByteArray (PrimState n)) Int Int (Int -> Action n r s)
+  | AFetchOrIntArray   (MutableByteArray (PrimState n)) Int Int (Int -> Action n r s)
+  | AFetchXorIntArray  (MutableByteArray (PrimState n)) Int Int (Int -> Action n r s)
+  | AFetchAddByteArrayInt (MutableByteArray (PrimState n)) Int Int (Int -> Action n r s)
 
   | AStoreLoadBarrier (Action n r s)
   | ALoadLoadBarrier (Action n r s)
@@ -335,11 +340,26 @@ data ThreadAction =
   -- ^ Perform a compare-and-swap on word-sized chunks of a
   -- 'MutableByteArray', returning the old value. and enforce a full
   -- memory barrier.
-  | FetchModByteArray
-  -- ^ Modify a word in a 'MutableByteArray', returning the old value,
+  | FetchAddIntArray
+  -- ^ Add to a word in a 'MutableByteArray', returning the old value,
   -- and enforce a full memory barrier.
-  | FetchModByteArray'
-  -- ^ Modify a word in a 'MutableByteArray', returning the new value,
+  | FetchSubIntArray
+  -- ^ Subtract from a word in a 'MutableByteArray', returning the old
+  -- value, and enforce a full memory barrier.
+  | FetchAndIntArray
+  -- ^ Bitwise AND to a word in a 'MutableByteArray', returning the
+  -- old value, and enforce a full memory barrier.
+  | FetchNandIntArray
+  -- ^ Bitwise NAND to a word in a 'MutableByteArray', returning the
+  -- old value, and enforce a full memory barrier.
+  | FetchOrIntArray
+  -- ^ Bitwise OR to a word in a 'MutableByteArray', returning the old
+  -- value, and enforce a full memory barrier.
+  | FetchXorIntArray
+  -- ^ Bitwise XOR to a word in a 'MutableByteArray', returning the
+  -- old value, and enforce a full memory barrier.
+  | FetchAddByteArrayInt
+  -- ^ Add to a word in a 'MutableByteArray', returning the new value,
   -- and enforce a full memory barrier.
   | StoreLoadBarrier
   -- ^ Executed a store/load barrier. This commits all pending stores
@@ -474,11 +494,26 @@ data Lookahead =
   -- ^ Will perform a compare-and-swap on word-sized chunks of a
   -- 'MutableByteArray', returning the old value. and enforce a full
   -- memory barrier.
-  | WillFetchModByteArray
-  -- ^ Will modify a word in a 'MutableByteArray', returning the old
+  | WillFetchAddIntArray
+  -- ^ Will add to a word in a 'MutableByteArray', returning the old
   -- value, and enforce a full memory barrier.
-  | WillFetchModByteArray'
-  -- ^ Will modify a word in a 'MutableByteArray', returning the new
+  | WillFetchSubIntArray
+  -- ^ Will subtract from a word in a 'MutableByteArray', returning
+  -- the old value, and enforce a full memory barrier.
+  | WillFetchAndIntArray
+  -- ^ Will bitwise AND to a word in a 'MutableByteArray', returning
+  -- the old value, and enforce a full memory barrier.
+  | WillFetchNandIntArray
+  -- ^ Will bitwise NAND to a word in a 'MutableByteArray', returning
+  -- the old value, and enforce a full memory barrier.
+  | WillFetchOrIntArray
+  -- ^ Will bitwise OR to a word in a 'MutableByteArray', returning
+  -- the old value, and enforce a full memory barrier.
+  | WillFetchXorIntArray
+  -- ^ Will bitwise XOR to a word in a 'MutableByteArray', returning
+  -- the old value, and enforce a full memory barrier.
+  | WillFetchAddByteArrayInt
+  -- ^ Will add to a word in a 'MutableByteArray', returning the new
   -- value, and enforce a full memory barrier.
   | WillStoreLoadBarrier
   -- ^ Will execute a store/load barrier

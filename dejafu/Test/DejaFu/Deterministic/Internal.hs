@@ -56,6 +56,7 @@ module Test.DejaFu.Deterministic.Internal
 
 import Control.Exception (MaskingState(..), SomeException(..))
 import Control.Monad.Primitive (PrimState)
+import Data.Atomics.Class (MonadAtomic)
 import Data.List (sort)
 import Data.List.Extra
 import Data.Maybe (fromJust, isJust, fromMaybe, isNothing, listToMaybe)
@@ -67,6 +68,7 @@ import Test.DejaFu.Deterministic.Internal.Threading
 import Test.DejaFu.Internal
 import Test.DejaFu.STM (CTVarId, Result(..))
 
+import qualified Data.Atomics.Class as A
 import qualified Data.IntMap.Strict as I
 import qualified Data.Map as M
 
@@ -84,12 +86,12 @@ import Control.Applicative ((<$>), (<*>))
 -- state, returning a 'Just' if it terminates, and 'Nothing' if a
 -- deadlock is detected. Also returned is the final state of the
 -- scheduler, and an execution trace.
-runFixed :: (Functor n, Monad n) => Fixed n r s -> (forall x. s x -> CTVarId -> n (Result x, CTVarId))
+runFixed :: (Functor n, MonadAtomic n) => Fixed n r s -> (forall x. s x -> CTVarId -> n (Result x, CTVarId))
          -> Scheduler g -> MemType -> g -> M n r s a -> n (Either Failure a, g, Trace')
 runFixed fixed runstm sched memtype s ma = (\(e,g,_,t) -> (e,g,t)) <$> runFixed' fixed runstm sched memtype s initialIdSource ma
 
 -- | Same as 'runFixed', be parametrised by an 'IdSource'.
-runFixed' :: forall n r s g a. (Functor n, Monad n)
+runFixed' :: forall n r s g a. (Functor n, MonadAtomic n)
   => Fixed n r s -> (forall x. s x -> CTVarId -> n (Result x, CTVarId))
   -> Scheduler g -> MemType -> g -> IdSource -> M n r s a -> n (Either Failure a, g, IdSource, Trace')
 runFixed' fixed runstm sched memtype s idSource ma = do
@@ -109,7 +111,7 @@ runFixed' fixed runstm sched memtype s idSource ma = do
 -- efficient to prepend to a list than append. As this function isn't
 -- exposed to users of the library, this is just an internal gotcha to
 -- watch out for.
-runThreads :: (Functor n, Monad n) => Fixed n r s -> (forall x. s x -> CTVarId -> n (Result x, CTVarId))
+runThreads :: (Functor n, MonadAtomic n) => Fixed n r s -> (forall x. s x -> CTVarId -> n (Result x, CTVarId))
            -> Scheduler g -> MemType -> g -> Threads n r s -> IdSource -> r (Maybe (Either Failure a)) -> n (g, IdSource, Trace')
 runThreads fixed runstm sched memtype origg origthreads idsrc ref = go idsrc [] Nothing origg origthreads emptyBuffer where
   go idSource sofar prior g threads wb
@@ -207,8 +209,13 @@ lookahead = unsafeToNonEmpty . lookahead' where
   lookahead' (ACasArrayElem _ _ _ _ _)  = [WillCasArrayElem]
   lookahead' (ACasArrayElem2 _ _ _ _ _) = [WillCasArrayElem2]
   lookahead' (ACasByteArrayInt _ _ _ _ _) = [WillCasByteArrayInt]
-  lookahead' (AFetchModByteArray _ _ _ _ _) = [WillFetchModByteArray]
-  lookahead' (AFetchModByteArray' _ _ _ _ _) = [WillFetchModByteArray']
+  lookahead' (AFetchAddIntArray _ _ _ _) = [WillFetchAddIntArray]
+  lookahead' (AFetchSubIntArray _ _ _ _) = [WillFetchSubIntArray]
+  lookahead' (AFetchAndIntArray _ _ _ _) = [WillFetchAndIntArray]
+  lookahead' (AFetchNandIntArray _ _ _ _) = [WillFetchNandIntArray]
+  lookahead' (AFetchOrIntArray _ _ _ _) = [WillFetchOrIntArray]
+  lookahead' (AFetchXorIntArray _ _ _ _) = [WillFetchXorIntArray]
+  lookahead' (AFetchAddByteArrayInt _ _ _ _) = [WillFetchAddByteArrayInt]
   lookahead' (AStoreLoadBarrier k)   = WillStoreLoadBarrier : lookahead' k
   lookahead' (ALoadLoadBarrier k)    = WillLoadLoadBarrier : lookahead' k
   lookahead' (AWriteBarrier k)       = WillWriteBarrier : lookahead' k
@@ -221,7 +228,7 @@ lookahead = unsafeToNonEmpty . lookahead' where
 
 -- | Run a single thread one step, by dispatching on the type of
 -- 'Action'.
-stepThread :: forall n r s. (Functor n, Monad n) => Fixed n r s
+stepThread :: forall n r s. (Functor n, MonadAtomic n) => Fixed n r s
   -> (forall x. s x -> CTVarId -> n (Result x, CTVarId))
   -- ^ Run a 'MonadSTM' transaction atomically.
   -> MemType
@@ -273,8 +280,13 @@ stepThread fixed runstm memtype action idSource tid threads wb = case action of
   ACasArrayElem arr off t a c -> stepCasArrayElem arr off t a c
   ACasArrayElem2 arr off t1 t2 c -> stepCasArrayElem2 arr off t1 t2 c
   ACasByteArrayInt mba off old new c -> stepCasByteArrayInt mba off old new c
-  AFetchModByteArray op mba off a c -> stepFetchModByteArray op mba off a c
-  AFetchModByteArray' op mba off a c -> stepFetchModByteArray' op mba off a c
+  AFetchAddIntArray mba off a c -> stepFetchAddIntArray mba off a c
+  AFetchSubIntArray mba off a c -> stepFetchSubIntArray mba off a c
+  AFetchAndIntArray mba off a c -> stepFetchAndIntArray mba off a c
+  AFetchNandIntArray mba off a c -> stepFetchNandIntArray mba off a c
+  AFetchOrIntArray mba off a c -> stepFetchOrIntArray mba off a c
+  AFetchXorIntArray mba off a c -> stepFetchXorIntArray mba off a c
+  AFetchAddByteArrayInt mba off a c -> stepFetchAddByteArrayInt mba off a c
   AStoreLoadBarrier c -> stepStoreLoadBarrier c
   ALoadLoadBarrier c -> stepLoadLoadBarrier c
   AWriteBarrier c -> stepWriteBarrier c
@@ -507,15 +519,35 @@ stepThread fixed runstm memtype action idSource tid threads wb = case action of
     -- | Perform a compare-and-swap on word-sized chunks of a
     -- 'MutableByteArray', returning the old value. and enforce a full
     -- memory barrier.
-    stepCasByteArrayInt mba off old new c = undefined -- CasByteIntArray
+    stepCasByteArrayInt mba off old new c = atomic (A.casByteArrayInt mba off old new) c CasByteArrayInt
 
-    -- | Modify a word in a 'MutableByteArray', returning the old
+    -- | Add to a word in a 'MutableByteArray', returning the old
     -- value, and enforce a full memory barrier.
-    stepFetchModByteArray op mba off a c = undefined -- FetchModByteArray
+    stepFetchAddIntArray mba off a c = atomic (A.fetchAddIntArray mba off a) c FetchAddIntArray
 
-    -- | Modify a word in a 'MutableByteArray', returning the new
+    -- | Subtract from a word in a 'MutableByteArray', returning the
+    -- old value, and enforce a full memory barrier.
+    stepFetchSubIntArray mba off a c = atomic (A.fetchSubIntArray mba off a) c FetchAddIntArray
+
+    -- | Bitwise AND to a word in a 'MutableByteArray', returning the
+    -- old value, and enforce a full memory barrier.
+    stepFetchAndIntArray mba off a c = atomic (A.fetchAndIntArray mba off a) c FetchAddIntArray
+
+    -- | Bitwise NAND to a word in a 'MutableByteArray', returning the
+    -- old value, and enforce a full memory barrier.
+    stepFetchNandIntArray mba off a c = atomic (A.fetchNandIntArray mba off a) c FetchAddIntArray
+
+    -- | Bitwise OR to a word in a 'MutableByteArray', returning the
+    -- old value, and enforce a full memory barrier.
+    stepFetchOrIntArray mba off a c = atomic (A.fetchOrIntArray mba off a) c FetchAddIntArray
+
+    -- | Bitwise XOR to a word in a 'MutableByteArray', returning the
+    -- old value, and enforce a full memory barrier.
+    stepFetchXorIntArray mba off a c = atomic (A.fetchXorIntArray mba off a) c FetchAddIntArray
+
+    -- | Add to a word in a 'MutableByteArray', returning the new
     -- value, and enforce a full memory barrier.
-    stepFetchModByteArray' op mba off a c = undefined -- FetchModByteArray'
+    stepFetchAddByteArrayInt mba off a c = atomic (A.fetchAddByteArrayInt mba off a) c FetchAddIntArray
 
     -- | Execute a store/load barrier.
     stepStoreLoadBarrier c = synchronised $ simple (goto c tid threads) StoreLoadBarrier
@@ -550,6 +582,11 @@ stepThread fixed runstm memtype action idSource tid threads wb = case action of
       return $ case res of
         Right (threads', idSource', act', _) -> Right (threads', idSource', act', emptyBuffer)
         _ -> res
+
+    -- | Helper for synchronised primitives
+    atomic na c act = synchronised $ do
+      a <- na
+      simple (goto (c a) tid threads) act
 
     -- | Helper function for wrapping up exceptions.
     wrap e = fromMaybe (SomeException e) $ cast e
