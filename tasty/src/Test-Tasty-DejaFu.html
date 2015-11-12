@@ -75,8 +75,8 @@
 <a name="line-66"></a><a name="autocheckCases"></a><span class='hs-comment'>-- | Predicates for the various autocheck functions.</span>
 <a name="line-67"></a><span class='hs-definition'>autocheckCases</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Eq</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>TestName</span><span class='hs-layout'>,</span> <span class='hs-conid'>Predicate</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span>
 <a name="line-68"></a><span class='hs-definition'>autocheckCases</span> <span class='hs-keyglyph'>=</span>
-<a name="line-69"></a>  <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-str'>"Never Deadlocks"</span><span class='hs-layout'>,</span> <span class='hs-varid'>deadlocksNever</span><span class='hs-layout'>)</span>
-<a name="line-70"></a>  <span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-str'>"No Exceptions"</span><span class='hs-layout'>,</span> <span class='hs-varid'>exceptionsNever</span><span class='hs-layout'>)</span>
+<a name="line-69"></a>  <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-str'>"Never Deadlocks"</span><span class='hs-layout'>,</span> <span class='hs-varid'>representative</span> <span class='hs-varid'>deadlocksNever</span><span class='hs-layout'>)</span>
+<a name="line-70"></a>  <span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-str'>"No Exceptions"</span><span class='hs-layout'>,</span> <span class='hs-varid'>representative</span> <span class='hs-varid'>exceptionsNever</span><span class='hs-layout'>)</span>
 <a name="line-71"></a>  <span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-str'>"Consistent Result"</span><span class='hs-layout'>,</span> <span class='hs-varid'>alwaysSame</span><span class='hs-layout'>)</span>
 <a name="line-72"></a>  <span class='hs-keyglyph'>]</span>
 <a name="line-73"></a>
